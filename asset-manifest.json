@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/GenAI_Concepts/static/css/main.8b050b93.css",
+    "main.js": "/GenAI_Concepts/static/js/main.17e4f4fc.js",
+    "static/js/453.b07ba04d.chunk.js": "/GenAI_Concepts/static/js/453.b07ba04d.chunk.js",
+    "index.html": "/GenAI_Concepts/index.html",
+    "main.8b050b93.css.map": "/GenAI_Concepts/static/css/main.8b050b93.css.map",
+    "main.17e4f4fc.js.map": "/GenAI_Concepts/static/js/main.17e4f4fc.js.map",
+    "453.b07ba04d.chunk.js.map": "/GenAI_Concepts/static/js/453.b07ba04d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8b050b93.css",
+    "static/js/main.17e4f4fc.js"
+  ]
+}
