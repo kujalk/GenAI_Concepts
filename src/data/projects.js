@@ -48,6 +48,14 @@ const projects = [
   path: "/bedrock-rerank-hybrid-search",
   },
   {
+  id: "Strands Agent and Agent Squad",
+  title: "Strands Agent and Agent Squad",
+  description: "Deep dive into Strands Agent SDK and Agent Squad coordination framework",
+  icon: "🧩",
+  tags: ["React", "Strands", "Agents", "Squad"],
+  path: "/strands-agent-squad",
+  },
+  {
   id: "bedrock-guardrails",
   title: "AWS Bedrock Guardrails",
   description: "Deep dive into AWS Bedrock Guardrails monitoring and configuration",
