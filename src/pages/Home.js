@@ -8,15 +8,15 @@ export default function Home() {
         {/* Header */}
         <header className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
-            GenAI Concepts Portfolio
+            AWS GenAI Concepts
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Exploring cutting-edge AI concepts through interactive visualizations and deep dives
+            Exploring AWS GenAI concepts through interactive visualizations and deep dives
           </p>
         </header>
 
         {/* Project Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {projects.map(project => (
             <ProjectCard key={project.id} project={project} />
           ))}

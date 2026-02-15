@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Layout from "../../components/Layout";
 
 const tabs = ["overview", "profiles", "crossregion", "routing", "provisioned", "compare", "quiz"];
 const tabLabels = { overview: "🗺️ Big Picture", profiles: "📋 Inference Profiles", crossregion: "🌍 Cross-Region", routing: "🧠 Intelligent Routing", provisioned: "⚡ Provisioned Throughput", compare: "📊 Compare All", quiz: "🧪 Quiz" };
@@ -60,6 +61,7 @@ export default function App() {
   const [tab, setTab] = useState("overview");
 
   return (
+    <Layout>
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", maxWidth: 920, margin: "0 auto", padding: "20px 16px" }}>
       <h1 style={{ fontSize: 21, fontWeight: 800, color: "#0f172a", margin: 0, textAlign: "center" }}>🤖 AWS Bedrock Inference Concepts</h1>
       <p style={{ color: "#64748b", textAlign: "center", margin: "4px 0 16px", fontSize: 13 }}>Inference Profiles • Cross-Region • Intelligent Routing • Provisioned Throughput</p>
@@ -569,5 +571,6 @@ export default function App() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

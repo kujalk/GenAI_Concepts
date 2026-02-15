@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Layout from "../../components/Layout";
 
 const sections = [
   "overview",
@@ -147,7 +148,8 @@ export default function BedrockAgents() {
   ];
 
   return (
-    <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)", minHeight: "100vh", color: "#e2e8f0", fontFamily: "'Inter','Segoe UI',system-ui,sans-serif" }}>
+    <Layout>
+      <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)", minHeight: "100vh", color: "#e2e8f0", fontFamily: "'Inter','Segoe UI',system-ui,sans-serif" }}>
       {/* Header */}
       <div style={{ padding: "28px 24px 16px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 8 }}>
@@ -541,6 +543,7 @@ runtime.get_agent_memory(
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }

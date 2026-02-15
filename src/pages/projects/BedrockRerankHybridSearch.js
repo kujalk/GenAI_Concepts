@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Layout from "../../components/Layout";
 
 const tabs = ["problem", "reranker", "pipeline", "hybrid", "fullflow", "compare", "quiz"];
 const tabLabels = { problem: "❓ The Problem", reranker: "🏆 Reranker Explained", pipeline: "🔄 Full Pipeline", hybrid: "🔀 Hybrid Search", fullflow: "🚀 Complete RAG Flow", compare: "📊 Compare", quiz: "🧪 Quiz" };
@@ -58,6 +59,7 @@ export default function App() {
   const [showReranked, setShowReranked] = useState(false);
 
   return (
+    <Layout>
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", maxWidth: 920, margin: "0 auto", padding: "20px 16px" }}>
       <h1 style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", margin: 0, textAlign: "center" }}>🔍 Bedrock RAG: Reranker & Hybrid Search</h1>
       <p style={{ color: "#64748b", textAlign: "center", margin: "4px 0 16px", fontSize: 13 }}>When is reranker called? What is hybrid search? Full visual breakdown.</p>
@@ -492,5 +494,6 @@ export default function App() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

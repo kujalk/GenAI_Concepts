@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Layout from "../../components/Layout";
 
 const tabs = ["overview", "cloudwatch", "logs", "s3trace", "dashboard", "quiz"];
 const tabLabels = { overview: "🗺️ Overview", cloudwatch: "📊 CloudWatch Metrics", logs: "📝 CloudWatch Logs", s3trace: "🪣 S3 + Athena", dashboard: "📈 Dashboard", quiz: "🧪 Quiz" };
@@ -65,6 +66,7 @@ export default function App() {
   const [tab, setTab] = useState("overview");
 
   return (
+    <Layout>
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", maxWidth: 920, margin: "0 auto", padding: "20px 16px" }}>
       <h1 style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", margin: 0, textAlign: "center" }}>{"🛡️ Bedrock Guardrail Monitoring"}</h1>
       <p style={{ color: "#64748b", textAlign: "center", margin: "4px 0 16px", fontSize: 13 }}>Track blocked content, topics, policies — full observability</p>
@@ -482,5 +484,6 @@ export default function App() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }
