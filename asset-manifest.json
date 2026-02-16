@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/GenAI_Concepts/static/css/main.16940f23.css",
-    "main.js": "/GenAI_Concepts/static/js/main.22723b2a.js",
+    "main.css": "/GenAI_Concepts/static/css/main.31e3f322.css",
+    "main.js": "/GenAI_Concepts/static/js/main.2cede44c.js",
     "static/js/453.b07ba04d.chunk.js": "/GenAI_Concepts/static/js/453.b07ba04d.chunk.js",
     "index.html": "/GenAI_Concepts/index.html",
-    "main.16940f23.css.map": "/GenAI_Concepts/static/css/main.16940f23.css.map",
-    "main.22723b2a.js.map": "/GenAI_Concepts/static/js/main.22723b2a.js.map",
+    "main.31e3f322.css.map": "/GenAI_Concepts/static/css/main.31e3f322.css.map",
+    "main.2cede44c.js.map": "/GenAI_Concepts/static/js/main.2cede44c.js.map",
     "453.b07ba04d.chunk.js.map": "/GenAI_Concepts/static/js/453.b07ba04d.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.16940f23.css",
-    "static/js/main.22723b2a.js"
+    "static/css/main.31e3f322.css",
+    "static/js/main.2cede44c.js"
   ]
 }
