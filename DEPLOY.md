@@ -79,6 +79,9 @@ This will:
 
 Create a new file: `src/pages/projects/YourProject.js`
 
+Just paste your React content directly — **no need to import or wrap with Layout**.
+The sidebar navigation is automatically applied by `App.js`.
+
 ```javascript
 export default function YourProject() {
   return (
@@ -89,6 +92,9 @@ export default function YourProject() {
   );
 }
 ```
+
+> **Note:** Layout (sidebar + navigation) is handled externally in `App.js` using
+> React Router's layout route pattern. Project pages only contain their own content.
 
 ### Step 2: Register in Project Config
 
@@ -113,7 +119,7 @@ Edit `src/App.js` and add:
 // At top with other imports
 import YourProject from './pages/projects/YourProject';
 
-// In the Routes section
+// Inside the <Route element={<Layout />}> section (NOT outside it)
 <Route path="/your-project" element={<YourProject />} />
 ```
 
@@ -232,6 +238,7 @@ src/
 │       ├── BedrockAgents.js        # AWS Bedrock project
 │       └── YourProject.js          # Your new projects go here
 ├── components/
+│   ├── Layout.js                   # Sidebar navigation (auto-applied to project routes)
 │   └── ProjectCard.js              # Reusable project card component
 └── index.js                        # App entry point
 ```

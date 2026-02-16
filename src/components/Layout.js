@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import projects from '../data/projects';
 
-export default function Layout({ children }) {
+export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -72,7 +72,7 @@ export default function Layout({ children }) {
 
       {/* Main Content */}
       <main className="lg:ml-64 min-h-screen">
-        {children}
+        <Outlet />
       </main>
     </div>
   );
