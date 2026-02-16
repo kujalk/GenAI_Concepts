@@ -83,7 +83,7 @@ const projects = [
   id: "mcp-server-a-architecture",
   title: "MCP Server Architecture",
   description: "Deep dive into the architecture of MCP servers and how they integrate with LLMs",
-  icon: "🧩",
+  icon: "🔌",
   tags: ["React", "MCP", "LLM", "Architecture"],
   path: "/mcp-server-a-architecture",
   },
@@ -107,7 +107,7 @@ const projects = [
   id: "LLM-Training-And-FineTuning",
   title: "LLM Training and Fine-Tuning",
   description: "Deep dive into LLM training and fine-tuning techniques for AWS Bedrock",
-  icon: "✍️",
+  icon: "🎓",
   tags: ["React", "AWS", "Bedrock", "LLM Training"],
   path: "/llm-training-and-finetuning",
   }
