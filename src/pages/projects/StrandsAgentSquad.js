@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "../../components/Layout";
+
 
 const STRANDS = {
   name: "Strands Agents SDK",
@@ -365,7 +365,6 @@ export default function App() {
   const [detail, setDetail] = useState("strands");
 
   return (
-    <Layout>
     <div style={{ minHeight: "100vh", color: "#fff", background: "linear-gradient(180deg, #0f0a1a 0%, #1a1033 50%, #0d1117 100%)", fontFamily: "system-ui, sans-serif" }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "16px 16px 48px" }}>
         <div style={{ textAlign: "center", marginBottom: 24, paddingTop: 16 }}>
@@ -388,6 +387,5 @@ export default function App() {
         {tab === "decide" && <Decide />}
       </div>
     </div>
-    </Layout>
   );
 }

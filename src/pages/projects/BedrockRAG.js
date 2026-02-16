@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "../../components/Layout";
+
 
 const approaches = [
   {
@@ -106,7 +106,6 @@ export default function App() {
   const a = approaches[selected];
 
   return (
-    <Layout>
       <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", maxWidth: 860, margin: "0 auto", padding: "24px 16px" }}>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0f172a", margin: 0 }}>
         🏗️ AWS Bedrock RAG — 3 Approaches Explained
@@ -242,6 +241,5 @@ export default function App() {
         ))}
       </div>
       </div>
-    </Layout>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "../../components/Layout";
+
 
 const agentTypes = [
   {
@@ -639,7 +639,6 @@ export default function MultiAgentExplorer() {
   const [selPat, setSelPat] = useState(null);
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gray-900 text-white p-4 md:p-6">
         <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-1 bg-gradient-to-r from-purple-400 via-cyan-400 to-amber-400 bg-clip-text text-transparent">
@@ -683,6 +682,5 @@ export default function MultiAgentExplorer() {
         {tab === 3 && <FrameworksTab />}
       </div>
     </div>
-    </Layout>
   );
 }

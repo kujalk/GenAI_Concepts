@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "../../components/Layout";
+
 
 const data = [
   {
@@ -116,7 +116,6 @@ export default function App() {
   const [expanded, setExpanded] = useState(null);
 
   return (
-    <Layout>
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", maxWidth: 900, margin: "0 auto", padding: "20px 16px" }}>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0f172a", margin: 0, textAlign: "center" }}>
         🧠 SageMaker Inference Options
@@ -329,6 +328,5 @@ export default function App() {
         </div>
       )}
     </div>
-    </Layout>
   );
 }
