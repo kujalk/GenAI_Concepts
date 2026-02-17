@@ -17,6 +17,7 @@ import TokenEfficiency from './pages/projects/TokenEfficiency';
 import PromptTypes from './pages/projects/PromptTypes';
 import MCPServerArchitecture from './pages/projects/MCPServerArchitecture';
 import LLMTrainingAndFineTuning from './pages/projects/LLMTrainingAndFineTuning';
+import SageMakerLineage from './pages/projects/SageMakerLineage';
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/bedrock-guardrails" element={<BedrockGuardrail />} />
           <Route path="/prompt-types" element={<PromptTypes />} />
           <Route path="/llm-training-and-finetuning" element={<LLMTrainingAndFineTuning />} />
+          <Route path="/sagemaker-lineage" element={<SageMakerLineage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

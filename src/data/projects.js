@@ -118,6 +118,14 @@ const projects = [
   icon: "🎓",
   tags: ["React", "AWS", "Bedrock", "LLM Training"],
   path: "/llm-training-and-finetuning",
+  },
+  {
+  id: "sagemaker-lineage",
+  title: "SageMaker Model Lineage",
+  description: "Interactive guide to SageMaker ML Lineage Tracking — automate data, model & metric provenance",
+  icon: "🔗",
+  tags: ["React", "AWS", "SageMaker", "MLOps"],
+  path: "/sagemaker-lineage",
   }
 
 ];
