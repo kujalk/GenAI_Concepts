@@ -275,65 +275,73 @@ resource "aws_bedrockagent_knowledge_base" "main" {
   },
   {
     id: "s3",
-    name: "S3 (Bedrock Data Source)",
-    short: "S3",
+    name: "Amazon S3 Vectors",
+    short: "S3 Vectors",
     icon: "🪣",
     color: "#F59E0B",
-    managed: "Fully managed object storage",
-    category: "Source Storage (Not a Vector DB)",
-    tagline: "Your document source — not a vector store itself, but where it all begins",
-    description: "Amazon S3 is not a vector database — it's the document source for Bedrock Knowledge Bases. S3 holds your raw documents (PDFs, text, HTML, etc.) which Bedrock ingests, chunks, embeds, and stores in one of the actual vector stores above. Understanding S3's role clarifies the full pipeline.",
-    architecture: "S3 bucket (source) → Bedrock ingestion job → chunking → embedding model → vector store (OpenSearch/Aurora/Redis/Neptune). S3 is stage 1 of the pipeline.",
-    maxDimensions: "N/A — not a vector store",
-    maxMetadataBytes: "S3 object metadata: 2 KB per object. Bedrock metadata files: unlimited JSON sidecar.",
-    indexAlgorithms: ["N/A"],
-    distanceMetrics: ["N/A"],
-    filtering: "S3-level: prefix, tags. Bedrock-level: metadata JSON sidecar files enable rich filtering at the vector store layer.",
+    managed: "Serverless (fully managed, pay-per-use)",
+    category: "Cloud Object Store + Native Vector",
+    tagline: "The first cloud object store with native vector support — up to 90% cheaper than alternatives",
+    description: "Amazon S3 Vectors is the first cloud object store with native support to store and query vectors. It delivers cost-optimized vector storage for AI applications, reducing costs by up to 90% compared to traditional vector databases while maintaining sub-second query performance. Supports up to 2 billion vectors per index with 10,000 indexes per bucket. Uses the s3vectors service namespace (separate from standard S3).",
+    architecture: "S3 Vector Bucket → Vector Indexes (up to 10,000) → Vectors with metadata. Bedrock Knowledge Bases can use vector indexes directly as a vector store. Also integrates with OpenSearch for tiered strategies (hot in OpenSearch, warm/cold in S3 Vectors).",
+    maxDimensions: "Not publicly specified",
+    maxMetadataBytes: "Key-value pairs per vector (string, number, boolean, list). All metadata filterable by default.",
+    indexAlgorithms: ["Managed (auto-optimized)"],
+    distanceMetrics: ["Cosine", "L2 (Euclidean)", "Inner Product"],
+    filtering: "All metadata filterable by default. Attach key-value pairs (string, number, boolean, list) to vectors. Mark fields as non-filterable to optimize storage.",
     hybridSearch: false,
-    bedrockIntegration: "Native — primary document source. Just point Bedrock to an S3 bucket/prefix. Supports .pdf, .txt, .html, .md, .csv, .doc, .xls.",
-    integrationLevel: 5,
+    bedrockIntegration: "Native — Bedrock Knowledge Bases supports S3 vector indexes as a vector store. Also integrates with SageMaker Unified Studio for development and testing.",
+    integrationLevel: 4,
     scalability: 5,
-    queryPerf: 0,
+    queryPerf: 3,
     costEfficiency: 5,
-    easeOfSetup: 5,
-    featureRichness: 2,
+    easeOfSetup: 4,
+    featureRichness: 3,
     pricing: {
-      model: "Storage + requests",
-      detail: "S3 Standard: $0.023/GB-mo. GET requests: $0.0004/1000. Extremely cheap for document storage. Intelligent Tiering available.",
-      free: "5 GB free for 12 months"
+      model: "Pay-per-use (storage + queries)",
+      detail: "Pay only for what you use — no minimum OCUs, no idle costs, no infrastructure provisioning. Up to 90% cheaper than traditional vector databases. Elastic storage scales automatically.",
+      free: "Pricing details on AWS pricing page"
     },
     pros: [
-      "Cheapest storage option by far",
-      "Native Bedrock data source — zero config",
-      "Supports all common document formats",
-      "Metadata sidecar files for rich filtering",
-      "Versioning and lifecycle policies built-in"
+      "Up to 90% cost reduction vs traditional vector stores",
+      "Massive scale: 2B vectors/index, 10K indexes/bucket",
+      "Zero infrastructure management — fully serverless",
+      "Strongly consistent writes — immediate data availability",
+      "Native Bedrock Knowledge Bases integration",
+      "Auto-optimizes vector data for best price-performance over time"
     ],
     cons: [
-      "Not a vector store — cannot query vectors directly",
-      "Must pair with an actual vector store for retrieval",
-      "Ingestion is batch-only (not real-time on upload without Lambda trigger)",
-      "No vector search, no similarity queries"
+      "Sub-second latency (not sub-millisecond like in-memory stores)",
+      "Best for infrequent query patterns, not real-time high-throughput",
+      "Newer service — smaller community and fewer examples",
+      "No hybrid keyword + vector search natively",
+      "Block Public Access always enabled (by design)"
     ],
-    bestFor: ["Document storage and ingestion source", "Any Bedrock KB pipeline (always needed)", "Cost-effective long-term document archive"],
-    notIdeal: ["Direct vector search (impossible)", "Real-time document updates without triggers"],
-    terraform: `resource "aws_s3_bucket" "kb_source" {
-  bucket = "my-bedrock-kb-documents"
-}
+    bestFor: ["Cost-sensitive RAG at scale", "Long-term vector archival with infrequent queries", "Tiered strategy: OpenSearch (hot) + S3 Vectors (warm/cold)", "Large-scale vector storage (billions of vectors)", "AI agent memory and context"],
+    notIdeal: ["Sub-10ms latency requirements", "High-frequency real-time queries", "Hybrid keyword + vector search needs"],
+    terraform: `# S3 Vectors uses the s3vectors API namespace
+# Create vector bucket, then index, then store vectors
 
-resource "aws_bedrockagent_data_source" "s3" {
-  knowledge_base_id = aws_bedrockagent_knowledge_base.main.id
-  name              = "s3-documents"
+# AWS CLI example:
+# aws s3vectors create-vector-bucket \\
+#   --vector-bucket-name my-kb-vectors
 
-  data_source_configuration {
-    type = "S3"
-    s3_configuration {
-      bucket_arn = aws_s3_bucket.kb_source.arn
-      # Optional prefix filter:
-      # inclusion_prefixes = ["docs/"]
-    }
-  }
-}`
+# aws s3vectors create-index \\
+#   --vector-bucket-name my-kb-vectors \\
+#   --index-name embeddings \\
+#   --dimension 1024 \\
+#   --distance-metric cosine
+
+# aws s3vectors put-vectors \\
+#   --vector-bucket-name my-kb-vectors \\
+#   --index-name embeddings \\
+#   --vectors '[{"key":"doc1","data":{"float32":[0.12,-0.34,...]},"metadata":{"source":"report.pdf"}}]'
+
+# aws s3vectors query-vectors \\
+#   --vector-bucket-name my-kb-vectors \\
+#   --index-name embeddings \\
+#   --query-vector '{"float32":[0.15,-0.32,...]}' \\
+#   --top-k 10`
   },
 ];
 
@@ -371,6 +379,11 @@ const decisionQuestions = [
     { label: "< 1M vectors", leads: "small" },
     { label: "1M – 50M vectors", leads: "medium" },
     { label: "50M+ vectors", leads: "large" },
+  ]},
+  { q: "What's your cost priority?", opts: [
+    { label: "Lowest possible cost", leads: "cheap" },
+    { label: "Balanced cost & performance", leads: "balanced" },
+    { label: "Performance first, cost secondary", leads: "perf" },
   ]},
 ];
 
@@ -471,18 +484,22 @@ export default function App() {
     setDecisionPath(newPath);
     setRecommendation(null);
 
-    if (newPath.length >= 3) {
-      const [dataModel, latency, scale] = [
+    if (newPath.length >= 4) {
+      const [dataModel, latency, scale, cost] = [
         decisionQuestions[0].opts[newPath[0]].leads,
         decisionQuestions[1].opts[newPath[1]].leads,
         decisionQuestions[2].opts[newPath[2]].leads,
+        decisionQuestions[3].opts[newPath[3]].leads,
       ];
       if (dataModel === "graph") setRecommendation("neptune");
       else if (latency === "redis") setRecommendation("redis");
+      else if (cost === "cheap" && latency === "relaxed") setRecommendation("s3");
+      else if (scale === "large" && cost === "cheap") setRecommendation("s3");
       else if (dataModel === "relational" && scale === "small") setRecommendation("aurora");
       else if (dataModel === "easy") setRecommendation("opensearch");
       else if (scale === "large") setRecommendation("opensearch");
       else if (dataModel === "relational") setRecommendation("aurora");
+      else if (cost === "cheap" && scale !== "small") setRecommendation("s3");
       else setRecommendation("opensearch");
     }
   };
@@ -519,7 +536,7 @@ export default function App() {
 
         {/* ===== DEEP DIVE ===== */}
         {tab === "explore" && <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginBottom: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8, marginBottom: 20 }}>
             {stores.map(st => (
               <button key={st.id} onClick={() => { setActiveStore(st.id); setShowTF(false); }}
                 style={{
@@ -632,7 +649,7 @@ export default function App() {
             {/* Selector */}
             <div style={{ display: "flex", gap: 6, marginBottom: 20, flexWrap: "wrap" }}>
               <span style={{ fontSize: 13, color: "#6B7280", fontWeight: 600, lineHeight: "34px" }}>Select (2–4):</span>
-              {stores.filter(x => x.id !== "s3").map(st => (
+              {stores.map(st => (
                 <button key={st.id} onClick={() => toggleCompare(st.id)}
                   style={{
                     padding: "6px 14px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600,
@@ -720,7 +737,7 @@ export default function App() {
             <div style={{ marginTop: 20, background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 12, padding: 20 }}>
               <h3 style={{ margin: "0 0 10px", fontSize: 15, fontWeight: 700, color: "#A78BFA" }}>Quick Verdicts</h3>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {stores.filter(x => x.id !== "s3").map(st => (
+                {stores.map(st => (
                   <div key={st.id} style={{ fontSize: 12, color: "#B0B7C3", lineHeight: 1.6 }}>
                     <span style={{ color: st.color, fontWeight: 700 }}>{st.icon} {st.short}:</span> {st.tagline}
                   </div>
