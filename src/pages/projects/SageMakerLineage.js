@@ -416,8 +416,160 @@ const limits = [
   { entity: "QueryLineage StartArns", limit: "1 ARN", icon: "🎯" },
 ];
 
-// ─── QUIZ DATA ───
+// ═══════════════════════════════════════════
+// ─── BEDROCK MODEL EVALUATION DATA ───
+// ═══════════════════════════════════════════
+
+const evalTypes = [
+  {
+    id: "automatic",
+    title: "Automatic (Algorithmic)",
+    icon: "🤖",
+    color: "#3b82f6",
+    bg: "#dbeafe",
+    border: "#2563eb",
+    desc: "Uses built-in or custom datasets with algorithmic metrics. Fully automated — no human involvement.",
+    how: "Computes BERTScore, F1, classification accuracy, toxicity (Detoxify), and semantic robustness automatically.",
+    bestFor: "Quick, repeatable benchmarking against standard NLP tasks",
+    cost: "Free scoring — you only pay for model inference",
+  },
+  {
+    id: "judge",
+    title: "LLM-as-a-Judge",
+    icon: "⚖️",
+    color: "#8b5cf6",
+    bg: "#ede9fe",
+    border: "#7c3aed",
+    desc: "A second LLM (evaluator/judge) scores the generator model's responses with explanations.",
+    how: "11 built-in metrics plus custom metrics. Judge models: Claude 3.5/3.7, Nova Pro, Llama 3.1, Mistral Large.",
+    bestFor: "Nuanced quality assessment with explanations — correctness, helpfulness, faithfulness, harmfulness",
+    cost: "Pay for both generator and evaluator model inference",
+  },
+  {
+    id: "human",
+    title: "Human-Based",
+    icon: "👥",
+    color: "#10b981",
+    bg: "#d1fae5",
+    border: "#059669",
+    desc: "Private work team (up to 50 workers via SageMaker Ground Truth) rates model responses.",
+    how: "Workers use thumbs up/down, Likert scales, comparison choices, or ordinal ranking.",
+    bestFor: "Subjective metrics like brand voice, style, friendliness — things algorithms can't judge",
+    cost: "Model inference + $0.21 per completed human task",
+  },
+  {
+    id: "rag",
+    title: "RAG Evaluation",
+    icon: "📚",
+    color: "#f59e0b",
+    bg: "#fef3c7",
+    border: "#d97706",
+    desc: "Evaluates retrieval quality and end-to-end retrieve-and-generate quality for Knowledge Bases.",
+    how: "Retrieve-only: context relevance + coverage. Retrieve-and-generate: all 11 judge metrics + faithfulness.",
+    bestFor: "Validating RAG pipelines before production — are retrieved contexts relevant and complete?",
+    cost: "Pay for model inference (judge model for RAG metrics)",
+  },
+];
+
+// ─── AUTOMATIC METRICS ───
+const autoMetrics = [
+  {
+    metric: "Builtin.Accuracy",
+    category: "Quality",
+    color: "#3b82f6",
+    desc: "Factual correctness — algorithm varies by task type",
+    details: [
+      { task: "Text Summarization", algo: "BERTScore", note: "Cosine similarity of BERT embeddings" },
+      { task: "Question & Answer", algo: "F1 Score", note: "Token-level F1 between generated and ground truth" },
+      { task: "Text Classification", algo: "Classification Accuracy", note: "Binary match: predicted vs ground truth" },
+      { task: "General Text Generation", algo: "RWK Score", note: "Real World Knowledge encoding ability" },
+    ],
+  },
+  {
+    metric: "Builtin.Robustness",
+    category: "Stability",
+    color: "#f59e0b",
+    desc: "Output stability under input perturbation (lower = better)",
+    details: [
+      { task: "Perturbation", algo: "5 methods applied", note: "Lowercase, typos, numbers-to-words, random case, whitespace" },
+      { task: "Summarization", algo: "Delta BERTScore / BERTScore x 100", note: "% degradation in BERTScore" },
+      { task: "Q&A", algo: "Delta F1 / F1 x 100", note: "% degradation in F1" },
+      { task: "Classification", algo: "Delta Acc / Acc x 100", note: "% degradation in accuracy" },
+    ],
+  },
+  {
+    metric: "Builtin.Toxicity",
+    category: "Safety",
+    color: "#ef4444",
+    desc: "Toxic content detection using Detoxify algorithm (lower = better)",
+    details: [
+      { task: "All task types", algo: "Detoxify", note: "0-1 scale toxicity score on generated output" },
+    ],
+  },
+];
+
+// ─── JUDGE METRICS (11 built-in) ───
+const judgeMetrics = [
+  { metric: "Correctness", cat: "Quality", color: "#3b82f6", desc: "Is the response factually correct? Uses reference response if supplied." },
+  { metric: "Completeness", cat: "Quality", color: "#3b82f6", desc: "Does the response fully answer all aspects of the prompt?" },
+  { metric: "Faithfulness", cat: "Quality", color: "#3b82f6", desc: "Does the response contain only information found in the provided context? (hallucination detection)" },
+  { metric: "Helpfulness", cat: "User Experience", color: "#10b981", desc: "Instruction adherence, sensibility, coherence, and anticipation of implicit needs." },
+  { metric: "Coherence", cat: "User Experience", color: "#10b981", desc: "Logical gaps, inconsistencies, and contradictions in the response." },
+  { metric: "Relevance", cat: "User Experience", color: "#10b981", desc: "How relevant the answer is to the prompt." },
+  { metric: "FollowingInstructions", cat: "Compliance", color: "#8b5cf6", desc: "How well the response follows exact directions in the prompt." },
+  { metric: "ProfessionalStyleAndTone", cat: "Compliance", color: "#8b5cf6", desc: "Appropriateness of style, formatting, and tone for professional settings." },
+  { metric: "Harmfulness", cat: "Responsible AI", color: "#ef4444", desc: "Whether the response contains harmful content." },
+  { metric: "Stereotyping", cat: "Responsible AI", color: "#ef4444", desc: "Whether content contains stereotypes (positive or negative)." },
+  { metric: "Refusal", cat: "Responsible AI", color: "#ef4444", desc: "Whether the response declines to answer or rejects the request." },
+];
+
+// ─── TASK TYPES & BUILT-IN DATASETS ───
+const taskTypes = [
+  {
+    task: "General Text Generation",
+    apiValue: "Generation",
+    color: "#3b82f6",
+    datasets: ["Builtin.T-Rex", "Builtin.Bold", "Builtin.Wikitext2", "Builtin.RealToxicityPrompts"],
+    metrics: ["Accuracy (RWK)", "Robustness", "Toxicity"],
+  },
+  {
+    task: "Text Summarization",
+    apiValue: "Summarization",
+    color: "#8b5cf6",
+    datasets: ["Builtin.Gigaword"],
+    metrics: ["Accuracy (BERTScore)", "Robustness", "Toxicity"],
+  },
+  {
+    task: "Question & Answer",
+    apiValue: "QuestionAndAnswer",
+    color: "#10b981",
+    datasets: ["Builtin.BoolQ", "Builtin.NaturalQuestions", "Builtin.TriviaQA"],
+    metrics: ["Accuracy (F1)", "Robustness", "Toxicity"],
+  },
+  {
+    task: "Text Classification",
+    apiValue: "Classification",
+    color: "#f59e0b",
+    datasets: ["Builtin.WomensEcommerceClothingReviews"],
+    metrics: ["Accuracy (ClassAcc)", "Robustness"],
+  },
+];
+
+// ─── EVAL LIMITS ───
+const evalLimits = [
+  { item: "Concurrent auto eval jobs", limit: "20/region", icon: "🤖" },
+  { item: "Concurrent human eval jobs", limit: "10/region", icon: "👥" },
+  { item: "Total eval jobs", limit: "5,000/account", icon: "📊" },
+  { item: "Datasets per auto job", limit: "5", icon: "📁" },
+  { item: "Metrics per dataset", limit: "3", icon: "📏" },
+  { item: "Models per auto job", limit: "1", icon: "🤖" },
+  { item: "Prompts per dataset", limit: "1,000", icon: "💬" },
+  { item: "Max prompt size", limit: "4 KB", icon: "📐" },
+];
+
+// ─── COMBINED QUIZ DATA ───
 const quizData = [
+  // Lineage questions
   { q: "Which lineage entity represents a URI-addressable object like an S3 dataset?", opts: ["Action", "Artifact", "Context", "Association"], ans: "Artifact" },
   { q: "What association type means 'source generated the destination'?", opts: ["ContributedTo", "Produced", "DerivedFrom", "AssociatedWith"], ans: "Produced" },
   { q: "Which entity provides logical grouping (e.g., Endpoints, Experiments)?", opts: ["Artifact", "Action", "Context", "TrialComponent"], ans: "Context" },
@@ -427,6 +579,15 @@ const quizData = [
   { q: "What does SageMaker auto-create for a Training Job?", opts: ["Only a Model artifact", "TrialComponent + Artifacts + Associations", "Only an Action", "Nothing — all manual"], ans: "TrialComponent + Artifacts + Associations" },
   { q: "Which direction finds what LED TO a given entity?", opts: ["Descendants", "Ascendants", "Both", "Lateral"], ans: "Ascendants" },
   { q: "What is the cross-account association type for the same entity?", opts: ["ContributedTo", "AssociatedWith", "DerivedFrom", "SameAs"], ans: "SameAs" },
+  // Bedrock Evaluation questions
+  { q: "Which algorithm does Bedrock use for Text Summarization accuracy?", opts: ["F1 Score", "BERTScore", "BLEU", "Classification Accuracy"], ans: "BERTScore" },
+  { q: "What is the max number of prompts per Bedrock evaluation dataset?", opts: ["100", "500", "1,000", "10,000"], ans: "1,000" },
+  { q: "Which Bedrock evaluation type uses a second LLM to score responses?", opts: ["Automatic", "LLM-as-a-Judge", "Human-Based", "RAG Evaluation"], ans: "LLM-as-a-Judge" },
+  { q: "How many built-in judge metrics does Bedrock provide?", opts: ["3", "5", "11", "15"], ans: "11" },
+  { q: "What algorithm does Bedrock use for toxicity detection?", opts: ["BERTScore", "Detoxify", "F1 Score", "ROUGE"], ans: "Detoxify" },
+  { q: "What is the cost of algorithmic scoring in automatic evaluation?", opts: ["$0.21/task", "$0.01/prompt", "Free (pay inference only)", "$1.00/job"], ans: "Free (pay inference only)" },
+  { q: "Which Bedrock eval metric detects hallucination in RAG responses?", opts: ["Correctness", "Faithfulness", "Relevance", "Completeness"], ans: "Faithfulness" },
+  { q: "How many models can you evaluate per automatic evaluation job?", opts: ["1", "2", "5", "10"], ans: "1" },
 ];
 
 // ─── COMPONENTS ───
@@ -590,6 +751,45 @@ const FlowDiagram = ({ steps }) => {
   );
 };
 
+// ─── EVALUATION ARCHITECTURE SVG ───
+const EvalArchSVG = () => {
+  const boxes = [
+    { x: 20, y: 20, w: 140, h: 50, label: "Prompt Dataset", sub: "(S3 JSONL)", fill: "#dbeafe", stroke: "#2563eb", text: "#1e40af" },
+    { x: 20, y: 100, w: 140, h: 50, label: "Generator Model", sub: "(Bedrock FM)", fill: "#ede9fe", stroke: "#7c3aed", text: "#5b21b6" },
+    { x: 240, y: 20, w: 160, h: 50, label: "Inference Phase", sub: "Model generates responses", fill: "#fef3c7", stroke: "#d97706", text: "#92400e" },
+    { x: 240, y: 100, w: 160, h: 50, label: "Evaluation Phase", sub: "Score each response", fill: "#d1fae5", stroke: "#059669", text: "#065f46" },
+    { x: 480, y: 20, w: 150, h: 50, label: "Automatic", sub: "BERTScore/F1/Detoxify", fill: "#dbeafe", stroke: "#2563eb", text: "#1e40af" },
+    { x: 480, y: 80, w: 150, h: 50, label: "LLM-as-a-Judge", sub: "11 built-in metrics", fill: "#ede9fe", stroke: "#7c3aed", text: "#5b21b6" },
+    { x: 480, y: 140, w: 150, h: 50, label: "Human Workers", sub: "Ground Truth team", fill: "#d1fae5", stroke: "#059669", text: "#065f46" },
+    { x: 700, y: 75, w: 140, h: 55, label: "Results (S3)", sub: "JSONL + Console Report", fill: "#0f172a", stroke: "#0f172a", text: "#fff" },
+  ];
+  return (
+    <svg viewBox="0 0 860 210" style={{ width: "100%", maxWidth: 860, display: "block", margin: "0 auto" }}>
+      <defs>
+        <marker id="eval-arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+        </marker>
+      </defs>
+      {/* Arrows */}
+      <line x1="160" y1="45" x2="235" y2="45" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      <line x1="160" y1="125" x2="235" y2="125" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      <line x1="400" y1="45" x2="475" y2="45" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      <line x1="400" y1="125" x2="475" y2="105" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      <line x1="400" y1="125" x2="475" y2="165" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      <line x1="630" y1="45" x2="695" y2="90" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      <line x1="630" y1="105" x2="695" y2="100" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      <line x1="630" y1="165" x2="695" y2="110" stroke="#94a3b8" strokeWidth="2" markerEnd="url(#eval-arrow)" />
+      {boxes.map((b, i) => (
+        <g key={i}>
+          <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={8} fill={b.fill} stroke={b.stroke} strokeWidth={1.5} />
+          <text x={b.x + b.w / 2} y={b.y + 20} textAnchor="middle" fontSize={10} fill={b.text} fontWeight="700">{b.label}</text>
+          <text x={b.x + b.w / 2} y={b.y + 36} textAnchor="middle" fontSize={8} fill={b.text} opacity={0.7}>{b.sub}</text>
+        </g>
+      ))}
+    </svg>
+  );
+};
+
 // ─── MAIN COMPONENT ───
 export default function SageMakerLineage() {
   const [tab, setTab] = useState("graph");
@@ -598,6 +798,8 @@ export default function SageMakerLineage() {
   const [expandedQuery, setExpandedQuery] = useState(null);
   const [graphHighlight, setGraphHighlight] = useState(null);
   const [showAutoDetails, setShowAutoDetails] = useState(null);
+  const [expandedAutoMetric, setExpandedAutoMetric] = useState(null);
+  const [expandedEvalType, setExpandedEvalType] = useState(null);
 
   const tabs = [
     ["graph", "Lineage Graph"],
@@ -605,6 +807,9 @@ export default function SageMakerLineage() {
     ["auto", "Auto-Tracking"],
     ["patterns", "Architecture"],
     ["queries", "Query & Audit"],
+    ["evalOverview", "Eval Overview"],
+    ["evalMetrics", "Eval Metrics"],
+    ["evalAPI", "Eval API"],
     ["limits", "Limits"],
     ["quiz", "Quiz"],
   ];
@@ -612,10 +817,10 @@ export default function SageMakerLineage() {
   return (
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", maxWidth: 920, margin: "0 auto", padding: "20px 16px" }}>
       <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0f172a", margin: 0, textAlign: "center" }}>
-        SageMaker Model Lineage Tracking
+        SageMaker Lineage & Bedrock Model Evaluation
       </h1>
       <p style={{ color: "#64748b", textAlign: "center", margin: "4px 0 20px", fontSize: 14 }}>
-        Automated tracking of data, models, metrics & deployments across the ML lifecycle
+        ML provenance tracking & model quality assessment across the lifecycle
       </p>
 
       {/* Tab Nav */}
@@ -885,18 +1090,343 @@ with Run(
         </div>
       )}
 
+      {/* ═══════════════════════════════════════════ */}
+      {/* ─── EVAL OVERVIEW TAB ─── */}
+      {/* ═══════════════════════════════════════════ */}
+      {tab === "evalOverview" && (
+        <div>
+          {/* What is it */}
+          <div style={{ background: "#fff", borderRadius: 14, border: "2px solid #e2e8f0", padding: 20, marginBottom: 16 }}>
+            <h3 style={{ margin: "0 0 10px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>What is Bedrock Model Evaluation?</h3>
+            <div style={{ fontSize: 13, lineHeight: 2, color: "#334155" }}>
+              <div><strong>Purpose:</strong> Assess foundation model quality, responsibility, and fitness-for-purpose before deploying to production.</div>
+              <div><strong>Evaluates:</strong> Bedrock FMs, custom/imported models, marketplace models, prompt routers, provisioned throughput models, and even non-Bedrock models (bring your own inference responses).</div>
+              <div><strong>Also evaluates:</strong> RAG pipelines — Amazon Bedrock Knowledge Bases or external RAG sources.</div>
+            </div>
+          </div>
+
+          {/* Architecture SVG */}
+          <div style={{ background: "#f8fafc", borderRadius: 14, border: "2px solid #e2e8f0", padding: 16, marginBottom: 16 }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Evaluation Architecture</h3>
+            <EvalArchSVG />
+          </div>
+
+          {/* 4 Evaluation Types */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+            {evalTypes.map(et => (
+              <div key={et.id} onClick={() => setExpandedEvalType(expandedEvalType === et.id ? null : et.id)}
+                style={{ background: et.bg, border: `2px solid ${et.border}`, borderRadius: 14, padding: 16, cursor: "pointer", transition: "transform 0.15s", transform: expandedEvalType === et.id ? "scale(1.02)" : "scale(1)" }}>
+                <div style={{ fontSize: 28, textAlign: "center" }}>{et.icon}</div>
+                <div style={{ fontWeight: 800, fontSize: 14, color: et.border, textAlign: "center", marginTop: 4 }}>{et.title}</div>
+                <div style={{ fontSize: 11, color: "#64748b", textAlign: "center", margin: "4px 0" }}>{et.desc}</div>
+                {expandedEvalType === et.id && (
+                  <div style={{ marginTop: 10, borderTop: `2px dashed ${et.color}`, paddingTop: 10 }}>
+                    <div style={{ fontSize: 11, color: "#334155", lineHeight: 1.8 }}>
+                      <div><strong>How:</strong> {et.how}</div>
+                      <div><strong>Best for:</strong> {et.bestFor}</div>
+                      <div><strong>Cost:</strong> {et.cost}</div>
+                    </div>
+                  </div>
+                )}
+                <div style={{ textAlign: "center", marginTop: 8, fontSize: 10, color: "#94a3b8" }}>
+                  {expandedEvalType === et.id ? "tap to collapse" : "tap for details"}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Task Types & Datasets */}
+          <div style={{ marginTop: 16, background: "#fff", borderRadius: 14, border: "2px solid #e2e8f0", padding: 16 }}>
+            <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Task Types & Built-in Datasets</h3>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr style={{ background: "#0f172a", color: "#fff" }}>
+                    <th style={{ padding: 10, textAlign: "left", borderRadius: "8px 0 0 0" }}>Task Type</th>
+                    <th style={{ padding: 10, textAlign: "left" }}>API Value</th>
+                    <th style={{ padding: 10, textAlign: "left" }}>Built-in Datasets</th>
+                    <th style={{ padding: 10, textAlign: "left", borderRadius: "0 8px 0 0" }}>Metrics</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {taskTypes.map((t, i) => (
+                    <tr key={t.task} style={{ background: i % 2 === 0 ? "#f8fafc" : "#fff" }}>
+                      <td style={{ padding: 10, fontWeight: 700, color: t.color, borderBottom: "1px solid #e2e8f0" }}>{t.task}</td>
+                      <td style={{ padding: 10, color: "#475569", borderBottom: "1px solid #e2e8f0", fontFamily: "monospace", fontSize: 11 }}>{t.apiValue}</td>
+                      <td style={{ padding: 10, color: "#475569", borderBottom: "1px solid #e2e8f0" }}>
+                        {t.datasets.map(d => (
+                          <span key={d} style={{ display: "inline-block", background: "#f1f5f9", borderRadius: 4, padding: "1px 6px", margin: "1px 2px", fontSize: 10 }}>{d}</span>
+                        ))}
+                      </td>
+                      <td style={{ padding: 10, color: "#475569", borderBottom: "1px solid #e2e8f0", fontSize: 11 }}>{t.metrics.join(", ")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ─── EVAL METRICS TAB ─── */}
+      {/* ═══════════════════════════════════════════ */}
+      {tab === "evalMetrics" && (
+        <div>
+          {/* Automatic Metrics */}
+          <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Automatic (Algorithmic) Metrics</h3>
+          {autoMetrics.map(m => (
+            <div key={m.metric} onClick={() => setExpandedAutoMetric(expandedAutoMetric === m.metric ? null : m.metric)}
+              style={{ background: "#fff", border: "2px solid #e2e8f0", borderRadius: 12, padding: 14, marginBottom: 10, cursor: "pointer" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ background: m.color, color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>{m.category}</span>
+                <span style={{ fontWeight: 700, fontSize: 13, color: "#0f172a" }}>{m.metric}</span>
+              </div>
+              <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>{m.desc}</div>
+              {expandedAutoMetric === m.metric && (
+                <div style={{ marginTop: 10, borderTop: "1px dashed #e2e8f0", paddingTop: 10 }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                    <thead>
+                      <tr style={{ background: "#f8fafc" }}>
+                        <th style={{ padding: 6, textAlign: "left", color: "#64748b" }}>Task / Method</th>
+                        <th style={{ padding: 6, textAlign: "left", color: "#64748b" }}>Algorithm</th>
+                        <th style={{ padding: 6, textAlign: "left", color: "#64748b" }}>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {m.details.map((d, i) => (
+                        <tr key={i}>
+                          <td style={{ padding: 6, fontWeight: 600, color: "#334155", borderTop: "1px solid #f1f5f9" }}>{d.task}</td>
+                          <td style={{ padding: 6, color: "#475569", borderTop: "1px solid #f1f5f9", fontFamily: "monospace" }}>{d.algo}</td>
+                          <td style={{ padding: 6, color: "#64748b", borderTop: "1px solid #f1f5f9" }}>{d.note}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <div style={{ textAlign: "right", marginTop: 4, fontSize: 10, color: "#94a3b8" }}>
+                {expandedAutoMetric === m.metric ? "collapse" : "tap for breakdown"}
+              </div>
+            </div>
+          ))}
+
+          {/* LLM-as-a-Judge Metrics */}
+          <h3 style={{ margin: "20px 0 12px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>LLM-as-a-Judge Metrics (11 Built-in)</h3>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr style={{ background: "#0f172a", color: "#fff" }}>
+                  <th style={{ padding: 10, textAlign: "left", borderRadius: "8px 0 0 0" }}>Metric</th>
+                  <th style={{ padding: 10, textAlign: "left" }}>Category</th>
+                  <th style={{ padding: 10, textAlign: "left", borderRadius: "0 8px 0 0" }}>What It Measures</th>
+                </tr>
+              </thead>
+              <tbody>
+                {judgeMetrics.map((jm, i) => (
+                  <tr key={jm.metric} style={{ background: i % 2 === 0 ? "#f8fafc" : "#fff" }}>
+                    <td style={{ padding: 10, fontWeight: 700, color: "#0f172a", borderBottom: "1px solid #e2e8f0", fontFamily: "monospace", fontSize: 11 }}>Builtin.{jm.metric}</td>
+                    <td style={{ padding: 10, borderBottom: "1px solid #e2e8f0" }}>
+                      <span style={{ background: jm.color, color: "#fff", borderRadius: 4, padding: "2px 6px", fontSize: 10, fontWeight: 600 }}>{jm.cat}</span>
+                    </td>
+                    <td style={{ padding: 10, color: "#475569", borderBottom: "1px solid #e2e8f0" }}>{jm.desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* RAG Metrics */}
+          <div style={{ marginTop: 16, background: "#fef3c7", borderRadius: 14, border: "2px solid #f59e0b", padding: 16 }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: "#92400e" }}>RAG-Specific Metrics</h3>
+            <div style={{ fontSize: 12, color: "#78350f", lineHeight: 2 }}>
+              <div><strong>Retrieve-only evaluation:</strong></div>
+              <div style={{ paddingLeft: 12 }}>Builtin.ContextRelevance — Are retrieved contexts relevant to the query?</div>
+              <div style={{ paddingLeft: 12 }}>Builtin.ContextCoverage — Do retrieved contexts cover the information needed?</div>
+              <div style={{ marginTop: 6 }}><strong>Retrieve-and-Generate evaluation:</strong></div>
+              <div style={{ paddingLeft: 12 }}>All 11 judge metrics above + Faithfulness for hallucination detection on RAG responses</div>
+            </div>
+          </div>
+
+          {/* Human Rating Methods */}
+          <div style={{ marginTop: 16, background: "#d1fae5", borderRadius: 14, border: "2px solid #059669", padding: 16 }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: "#065f46" }}>Human Evaluation Rating Methods</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginTop: 8 }}>
+              {[
+                { name: "Thumbs Up/Down", desc: "Binary approval/rejection" },
+                { name: "Likert Scale", desc: "5-point nuanced rating" },
+                { name: "Comparison Choice", desc: "Select preferred response" },
+                { name: "Ordinal Rank", desc: "Sequential ranking from 1" },
+              ].map(r => (
+                <div key={r.name} style={{ background: "#fff", borderRadius: 8, padding: 10, border: "1px solid #059669" }}>
+                  <div style={{ fontWeight: 700, fontSize: 12, color: "#065f46" }}>{r.name}</div>
+                  <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>{r.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ─── EVAL API TAB ─── */}
+      {/* ═══════════════════════════════════════════ */}
+      {tab === "evalAPI" && (
+        <div>
+          {/* API Operations */}
+          <div style={{ background: "#fff", borderRadius: 14, border: "2px solid #e2e8f0", padding: 16, marginBottom: 16 }}>
+            <h3 style={{ margin: "0 0 10px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>API Operations</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 }}>
+              {[
+                { api: "CreateEvaluationJob", desc: "Creates a new eval job", color: "#3b82f6" },
+                { api: "GetEvaluationJob", desc: "Retrieves job details & status", color: "#10b981" },
+                { api: "ListEvaluationJobs", desc: "Lists all jobs with filters", color: "#8b5cf6" },
+                { api: "StopEvaluationJob", desc: "Stops a running job", color: "#ef4444" },
+              ].map(a => (
+                <div key={a.api} style={{ background: "#f8fafc", borderRadius: 8, padding: 10, borderLeft: `3px solid ${a.color}` }}>
+                  <div style={{ fontWeight: 700, fontSize: 12, color: a.color, fontFamily: "monospace" }}>{a.api}</div>
+                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{a.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Create Automatic Eval Job */}
+          <div style={{ background: "#dbeafe", borderRadius: 14, border: "2px solid #2563eb", padding: 16, marginBottom: 14 }}>
+            <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#1e40af" }}>Create Automatic Evaluation Job (boto3)</h3>
+            <CodeBlock code={`import boto3
+
+client = boto3.client("bedrock", region_name="us-west-2")
+
+response = client.create_evaluation_job(
+    jobName="my-eval-qa-boolq",
+    jobDescription="Evaluate Claude on Q&A with BoolQ",
+    roleArn="arn:aws:iam::111122223333:role/BedrockEvalRole",
+    inferenceConfig={
+        "models": [{
+            "bedrockModel": {
+                "modelIdentifier": "anthropic.claude-3-haiku-20240307-v1:0",
+                "inferenceParams": '{"max_tokens":512,"temperature":0.7}'
+            }
+        }]
+    },
+    outputDataConfig={
+        "s3Uri": "s3://my-bucket/eval-outputs/"
+    },
+    evaluationConfig={
+        "automated": {
+            "datasetMetricConfigs": [{
+                "taskType": "QuestionAndAnswer",
+                "dataset": {"name": "Builtin.BoolQ"},
+                "metricNames": [
+                    "Builtin.Accuracy",
+                    "Builtin.Robustness"
+                ]
+            }]
+        }
+    }
+)
+
+job_arn = response["jobArn"]`} />
+          </div>
+
+          {/* Monitor & Retrieve */}
+          <div style={{ background: "#d1fae5", borderRadius: 14, border: "2px solid #059669", padding: 16, marginBottom: 14 }}>
+            <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#065f46" }}>Monitor & Retrieve Results</h3>
+            <CodeBlock code={`import time, json
+
+# Poll for completion
+while True:
+    job = client.get_evaluation_job(jobIdentifier=job_arn)
+    status = job["status"]
+    print(f"Status: {status}")
+    if status in ("Completed", "Failed", "Stopped"):
+        break
+    time.sleep(30)
+
+# Parse results from S3 output
+s3 = boto3.client("s3")
+response = s3.get_object(
+    Bucket="my-bucket",
+    Key="eval-outputs/.../output.jsonl"
+)
+
+for line in response["Body"].iter_lines():
+    result = json.loads(line)
+    scores = result["automatedEvaluationResult"]["scores"]
+    prompt = result["inputRecord"]["prompt"]
+    for score in scores:
+        print(f"Metric: {score['metricName']}")
+        print(f"  Score: {score['result']}")`} />
+          </div>
+
+          {/* Custom Dataset Format */}
+          <div style={{ background: "#ede9fe", borderRadius: 14, border: "2px solid #7c3aed", padding: 16, marginBottom: 14 }}>
+            <h3 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "#5b21b6" }}>Custom Prompt Dataset (JSONL Format)</h3>
+            <div style={{ fontSize: 12, color: "#4c1d95", lineHeight: 1.8, marginBottom: 8 }}>
+              <div>Upload a <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>.jsonl</code> file to S3 (max 1,000 prompts, 4KB each)</div>
+            </div>
+            <CodeBlock code={`// For automatic + judge evaluation:
+{"prompt": "What is ML?", "referenceResponse": "Machine learning is...", "category": "AI"}
+
+// For Bring Your Own Inference Response (BYOIR):
+{
+  "prompt": "What is HIIT?",
+  "referenceResponse": "High-Intensity Interval Training...",
+  "category": "Fitness",
+  "modelResponses": [{
+    "response": "HIIT is a workout strategy...",
+    "modelIdentifier": "my_external_model"
+  }]
+}`} />
+          </div>
+
+          {/* Judge Models */}
+          <div style={{ background: "#fef3c7", borderRadius: 14, border: "2px solid #f59e0b", padding: 16 }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700, color: "#92400e" }}>Supported Judge Models</h3>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {[
+                "Claude 3.5 Sonnet v1/v2",
+                "Claude 3.7 Sonnet",
+                "Claude 3 Haiku",
+                "Claude 3.5 Haiku",
+                "Amazon Nova Pro",
+                "Llama 3.1 70B Instruct",
+                "Mistral Large",
+              ].map(m => (
+                <span key={m} style={{ background: "#fff", border: "1px solid #d97706", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, color: "#92400e" }}>{m}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ─── LIMITS TAB ─── */}
       {tab === "limits" && (
         <div>
-          <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 14px", textAlign: "center" }}>
-            Per-account, per-region limits. Auto-created entities have NO limits.
+          {/* Lineage Limits */}
+          <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>SageMaker Lineage Limits</h3>
+          <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 12px" }}>
+            Per-account, per-region. Auto-created entities have NO limits.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 24 }}>
             {limits.map(l => (
-              <div key={l.entity} style={{ background: "#fff", border: "2px solid #e2e8f0", borderRadius: 14, padding: 16, textAlign: "center" }}>
-                <div style={{ fontSize: 28 }}>{l.icon}</div>
-                <div style={{ fontWeight: 700, fontSize: 12, color: "#334155", marginTop: 4 }}>{l.entity}</div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: l.limit === "Unlimited" ? "#059669" : "#2563eb", marginTop: 6 }}>{l.limit}</div>
+              <div key={l.entity} style={{ background: "#fff", border: "2px solid #e2e8f0", borderRadius: 14, padding: 14, textAlign: "center" }}>
+                <div style={{ fontSize: 24 }}>{l.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 11, color: "#334155", marginTop: 4 }}>{l.entity}</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: l.limit === "Unlimited" ? "#059669" : "#2563eb", marginTop: 4 }}>{l.limit}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Eval Limits */}
+          <h3 style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Bedrock Evaluation Limits</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 16 }}>
+            {evalLimits.map(l => (
+              <div key={l.item} style={{ background: "#fff", border: "2px solid #e2e8f0", borderRadius: 14, padding: 14, textAlign: "center" }}>
+                <div style={{ fontSize: 24 }}>{l.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 11, color: "#334155", marginTop: 4 }}>{l.item}</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: "#2563eb", marginTop: 4 }}>{l.limit}</div>
               </div>
             ))}
           </div>
@@ -905,10 +1435,11 @@ with Run(
           <div style={{ background: "#fef3c7", borderRadius: 14, border: "2px solid #f59e0b", padding: 16 }}>
             <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: "#92400e" }}>Key Constraints</h3>
             <div style={{ fontSize: 12, color: "#78350f", lineHeight: 2 }}>
-              <div><strong>SourceUri uniqueness:</strong> SageMaker reuses artifacts with the same SourceUri (no duplicates)</div>
+              <div><strong>Lineage SourceUri uniqueness:</strong> SageMaker reuses artifacts with the same SourceUri (no duplicates)</div>
               <div><strong>Association constraint:</strong> Cannot create associations between two Experiment entities</div>
               <div><strong>QueryLineage StartArns:</strong> Only 1 ARN per query (must paginate for multiple starting points)</div>
-              <div><strong>Regional availability:</strong> QueryLineage NOT available in af-south-1, ap-southeast-3, ap-northeast-3, eu-south-1, eu-south-2, il-central-1</div>
+              <div><strong>Eval pricing:</strong> Algorithmic scoring is free; LLM-as-a-Judge charges for both models; Human eval costs $0.21/task</div>
+              <div><strong>Eval regions:</strong> Available in US East (N. Virginia) and US West (Oregon)</div>
             </div>
           </div>
         </div>
@@ -917,7 +1448,7 @@ with Run(
       {/* ─── QUIZ TAB ─── */}
       {tab === "quiz" && (
         <div>
-          <p style={{ fontSize: 14, color: "#64748b", margin: "0 0 16px", textAlign: "center" }}>Test your understanding! Click an answer to check.</p>
+          <p style={{ fontSize: 14, color: "#64748b", margin: "0 0 16px", textAlign: "center" }}>Test your understanding of both Lineage and Evaluation! Click an answer to check.</p>
           {quizData.map((q, i) => (
             <QuizCard key={i} q={q.q} opts={q.opts} ans={q.ans} />
           ))}

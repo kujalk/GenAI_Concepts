@@ -121,10 +121,10 @@ const projects = [
   },
   {
   id: "sagemaker-lineage",
-  title: "SageMaker Model Lineage",
-  description: "Interactive guide to SageMaker ML Lineage Tracking — automate data, model & metric provenance",
+  title: "SageMaker Lineage & Bedrock Eval",
+  description: "ML lineage tracking & Bedrock model evaluation — provenance, metrics, and quality assessment",
   icon: "🔗",
-  tags: ["React", "AWS", "SageMaker", "MLOps"],
+  tags: ["React", "AWS", "SageMaker", "Bedrock", "MLOps"],
   path: "/sagemaker-lineage",
   }
 
