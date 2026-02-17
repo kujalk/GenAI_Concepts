@@ -13,6 +13,9 @@ export default function Home() {
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Exploring AWS GenAI concepts through interactive visualizations and deep dives
           </p>
+          <div className="mt-4 flex justify-center">
+            <img src="https://visitor-badge.laobi.icu/badge?page_id=aws-genai-concepts" alt="visitors" className="h-7" />
+          </div>
         </header>
 
         {/* Project Grid */}

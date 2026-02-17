@@ -1,5 +1,13 @@
 const projects = [
   {
+    id: "aws-ml-services-overview",
+    title: "AWS ML Services Overview",
+    description: "Overview of AWS AI and ML services including Bedrock, SageMaker, and AI Services",
+    icon: "🧠",
+    tags: ["React", "AWS", "ML", "AI"],
+    path: "/aws-ml-services-overview",
+  },
+  {
     id: "aws-vector-stores",
     title: "AWS Vector Stores",
     description: "Deep dive into AWS vector store options for Bedrock Knowledge Bases",

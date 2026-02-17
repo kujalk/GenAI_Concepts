@@ -169,9 +169,27 @@ const awsServices = [
     features: [
       { label: "Supported Models", value: "Titan Text, Llama 2/3, Cohere Command, Mistral" },
       { label: "Method", value: "Full fine-tuning or continued pre-training" },
-      { label: "Data Format", value: "JSONL with prompt/completion pairs in S3" },
+      { label: "Data Format", value: "JSONL in S3 — format depends on customization type (see below)" },
       { label: "Customization", value: "Epochs, batch size, learning rate, warmup steps" },
       { label: "Output", value: "Provisioned Throughput model (custom model endpoint)" },
+    ],
+    dataFormats: [
+      {
+        type: "Fine-Tuning (Labeled Data)",
+        desc: "Supervised fine-tuning with prompt/completion pairs — teaches the model to respond in a specific way",
+        formats: [
+          { label: "Non-Conversational", example: '{"prompt": "What is Amazon EC2?", "completion": "Amazon EC2 is a web service that provides resizable compute capacity in the cloud."}' },
+          { label: "Conversational (Claude)", example: '{"system": "You are a helpful AWS assistant.", "messages": [{"role": "user", "content": "What is EC2?"}, {"role": "assistant", "content": "Amazon EC2 provides scalable compute capacity."}]}' },
+        ]
+      },
+      {
+        type: "Continued Pre-Training (Unlabeled Data)",
+        desc: "Feed raw domain text to expand the model\'s knowledge — no prompt/completion structure needed",
+        formats: [
+          { label: "Input-only format", example: '{"input": "Amazon EC2 provides resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers."}' },
+          { label: "Domain knowledge", example: '{"input": "AWS Lambda is a serverless compute service that runs your code in response to events and automatically manages the underlying compute resources."}' },
+        ]
+      },
     ],
     steps: [
       "Prepare training data as JSONL in S3",
@@ -519,6 +537,26 @@ export default function LLMTrainingGuide() {
                 </div>
               ))}
             </div>
+
+            {a.dataFormats && (
+              <div style={{ background: "#0F172A", borderRadius: 12, padding: 14, margin: "14px 0" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#EC4899", marginBottom: 10 }}>DATA FORMAT EXAMPLES</div>
+                {a.dataFormats.map((df, i) => (
+                  <div key={i} style={{ marginBottom: i < a.dataFormats.length - 1 ? 16 : 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: i === 0 ? "#10B981" : "#F59E0B" }}>{i === 0 ? "📋" : "📄"} {df.type}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 8, lineHeight: 1.5 }}>{df.desc}</div>
+                    {df.formats.map((fmt, j) => (
+                      <div key={j} style={{ marginBottom: 8 }}>
+                        <div style={{ fontSize: 10, fontWeight: 600, color: "#64748B", marginBottom: 4 }}>{fmt.label}:</div>
+                        <pre style={{ background: "#1E293B", borderRadius: 8, padding: 10, margin: 0, fontSize: 11, color: "#CBD5E1", overflow: "auto", fontFamily: "'Fira Code', monospace", lineHeight: 1.5, borderLeft: `3px solid ${i === 0 ? "#10B981" : "#F59E0B"}` }}>{fmt.example}</pre>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div style={{ margin: "14px 0" }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "#8B5CF6", marginBottom: 6 }}>CODE EXAMPLE</div>

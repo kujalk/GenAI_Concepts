@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import AWSMLServicesOverview from './pages/projects/AWSMLServicesOverview';
 import MultiAgentExplorer from './pages/projects/MultiAgentExplorer';
 import BedrockAgents from './pages/projects/BedrockAgents';
 import BedrockRAG from './pages/projects/BedrockRAG';
@@ -23,6 +24,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route element={<Layout />}>
+          <Route path="/aws-ml-services-overview" element={<AWSMLServicesOverview />} />
           <Route path="/aws-vector-stores" element={<VectorStore />} />
           <Route path="/chunking-strategies" element={<ChunkingStrategies />} />
           <Route path="/multi-agent-explorer" element={<MultiAgentExplorer />} />
