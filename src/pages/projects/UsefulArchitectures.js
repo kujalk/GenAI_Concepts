@@ -2,6 +2,8 @@ import { useState } from "react";
 
 const archTabs = [
   { id: "s3-opensearch", label: "S3 → OpenSearch Ingestion", icon: "📄" },
+  { id: "bedrock-rag-kb", label: "Serverless RAG with Bedrock KB", icon: "📚" },
+  { id: "genai-chat", label: "Real-Time GenAI Chat App", icon: "💬" },
 ];
 
 const CodeBlock = ({ code }) => (
@@ -101,6 +103,97 @@ const IngestionArchSVG = ({ highlight, onHighlight }) => {
           </g>
         );
       })}
+    </svg>
+  );
+};
+
+// ─── Serverless RAG Architecture SVG ───
+const RAGArchSVG = () => {
+  const services = [
+    { id: "s3", x: 20, y: 20, w: 120, h: 55, label: "Amazon S3", sub: "PDF, HTML, CSV, TXT", fill: "#d1fae5", stroke: "#059669", icon: "🪣" },
+    { id: "kb", x: 200, y: 20, w: 160, h: 55, label: "Bedrock Knowledge Base", sub: "Chunk → Embed → Index", fill: "#ede9fe", stroke: "#7c3aed", icon: "📚" },
+    { id: "oss", x: 420, y: 20, w: 170, h: 55, label: "OpenSearch Serverless", sub: "Vector Store (k-NN)", fill: "#dbeafe", stroke: "#2563eb", icon: "🔍" },
+    { id: "user", x: 20, y: 150, w: 100, h: 55, label: "User / App", sub: "Query via API", fill: "#fef3c7", stroke: "#d97706", icon: "👤" },
+    { id: "agent", x: 180, y: 150, w: 140, h: 55, label: "Bedrock Agent", sub: "Orchestration (optional)", fill: "#fce7f3", stroke: "#ec4899", icon: "🤖" },
+    { id: "retrieve", x: 380, y: 150, w: 130, h: 55, label: "Retrieve API", sub: "Top-K vector search", fill: "#dbeafe", stroke: "#2563eb", icon: "🔎" },
+    { id: "fm", x: 200, y: 260, w: 160, h: 55, label: "Foundation Model", sub: "Claude / Titan / Llama", fill: "#fce7f3", stroke: "#ec4899", icon: "🧠" },
+    { id: "response", x: 430, y: 260, w: 140, h: 55, label: "Cited Response", sub: "Answer + S3 citations", fill: "#d1fae5", stroke: "#059669", icon: "📋" },
+  ];
+  const arrows = [
+    { path: "M140,47 L200,47", color: "#7c3aed", label: "sync" },
+    { path: "M360,47 L420,47", color: "#2563eb", label: "vectors" },
+    { path: "M120,177 L180,177", color: "#ec4899", label: "query" },
+    { path: "M320,177 L380,177", color: "#2563eb", label: "search" },
+    { path: "M445,205 L445,260", color: "#2563eb", label: "chunks" },
+    { path: "M280,205 L280,260", color: "#ec4899", label: "context + query" },
+    { path: "M360,287 L430,287", color: "#059669", label: "answer" },
+  ];
+  return (
+    <svg viewBox="0 0 620 340" style={{ width: "100%", maxWidth: 620, display: "block", margin: "0 auto" }}>
+      <defs>
+        {["#7c3aed","#2563eb","#ec4899","#059669","#d97706"].map(c=>(
+          <marker key={c} id={`rag-arr-${c.slice(1)}`} viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0 0, 10 3.5, 0 7" fill={c}/>
+          </marker>
+        ))}
+      </defs>
+      <rect x="5" y="5" width="600" height="80" rx="10" fill="#ede9fe" opacity="0.12" stroke="#7c3aed" strokeWidth="1" strokeDasharray="4"/>
+      <text x="15" y="16" fontSize="8" fill="#7c3aed" fontWeight="700">INGESTION PIPELINE (MANAGED)</text>
+      <rect x="5" y="130" width="600" height="190" rx="10" fill="#fce7f3" opacity="0.1" stroke="#ec4899" strokeWidth="1" strokeDasharray="4"/>
+      <text x="15" y="143" fontSize="8" fill="#ec4899" fontWeight="700">QUERY FLOW (RetrieveAndGenerate)</text>
+      {arrows.map((a,i)=>{
+        const pts=a.path.match(/[\d.]+/g).map(Number);
+        const mx=(pts[0]+pts[pts.length-2])/2, my=(pts[1]+pts[pts.length-1])/2;
+        return(<g key={i}><path d={a.path} fill="none" stroke={a.color} strokeWidth={2} markerEnd={`url(#rag-arr-${a.color.slice(1)})`} opacity={0.6}/><text x={mx} y={my-6} textAnchor="middle" fontSize={8} fill={a.color} fontWeight="600">{a.label}</text></g>);
+      })}
+      {services.map(s=>(
+        <g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/><text x={s.x+s.w/2} y={s.y+20} textAnchor="middle" fontSize={10} fill={s.stroke} fontWeight="700">{s.icon} {s.label}</text><text x={s.x+s.w/2} y={s.y+34} textAnchor="middle" fontSize={8} fill="#64748b">{s.sub}</text></g>
+      ))}
+    </svg>
+  );
+};
+
+// ─── Real-Time GenAI Chat Architecture SVG ───
+const ChatArchSVG = () => {
+  const services = [
+    { id: "client", x: 20, y: 30, w: 110, h: 55, label: "React SPA", sub: "CloudFront + S3", fill: "#dbeafe", stroke: "#2563eb", icon: "🌐" },
+    { id: "cognito", x: 170, y: 30, w: 110, h: 55, label: "Cognito", sub: "JWT Auth", fill: "#fef3c7", stroke: "#d97706", icon: "🔐" },
+    { id: "apigw", x: 320, y: 30, w: 130, h: 55, label: "API Gateway", sub: "REST / WebSocket", fill: "#ede9fe", stroke: "#7c3aed", icon: "🔗" },
+    { id: "lambda", x: 320, y: 140, w: 130, h: 55, label: "Lambda", sub: "Chat Handler", fill: "#fef3c7", stroke: "#d97706", icon: "⚡" },
+    { id: "guardrail", x: 500, y: 30, w: 120, h: 55, label: "Guardrails", sub: "Content Safety", fill: "#fee2e2", stroke: "#dc2626", icon: "🛡️" },
+    { id: "bedrock", x: 500, y: 140, w: 120, h: 55, label: "Bedrock FM", sub: "Claude / Titan", fill: "#fce7f3", stroke: "#ec4899", icon: "🧠" },
+    { id: "dynamo", x: 140, y: 140, w: 130, h: 55, label: "DynamoDB", sub: "Conversation Memory", fill: "#d1fae5", stroke: "#059669", icon: "💾" },
+    { id: "cloudwatch", x: 320, y: 250, w: 130, h: 50, label: "CloudWatch", sub: "Logs + Metrics", fill: "#e0e7ff", stroke: "#4f46e5", icon: "📊" },
+    { id: "stream", x: 20, y: 140, w: 80, h: 55, label: "Stream", sub: "Response tokens", fill: "#fce7f3", stroke: "#ec4899", icon: "📡" },
+  ];
+  const arrows = [
+    { path: "M130,57 L170,57", color: "#d97706", label: "auth" },
+    { path: "M280,57 L320,57", color: "#7c3aed", label: "request" },
+    { path: "M385,85 L385,140", color: "#d97706", label: "invoke" },
+    { path: "M450,167 L500,167", color: "#ec4899", label: "prompt" },
+    { path: "M500,57 L450,57", color: "#dc2626", label: "check" },
+    { path: "M560,85 L560,140", color: "#dc2626", label: "filter" },
+    { path: "M320,167 L270,167", color: "#059669", label: "load/save" },
+    { path: "M385,195 L385,250", color: "#4f46e5", label: "logs" },
+    { path: "M140,167 L100,167", color: "#ec4899", label: "tokens" },
+  ];
+  return (
+    <svg viewBox="0 0 650 320" style={{ width: "100%", maxWidth: 650, display: "block", margin: "0 auto" }}>
+      <defs>
+        {["#7c3aed","#2563eb","#ec4899","#059669","#d97706","#dc2626","#4f46e5"].map(c=>(
+          <marker key={c} id={`chat-arr-${c.slice(1)}`} viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0 0, 10 3.5, 0 7" fill={c}/>
+          </marker>
+        ))}
+      </defs>
+      {arrows.map((a,i)=>{
+        const pts=a.path.match(/[\d.]+/g).map(Number);
+        const mx=(pts[0]+pts[pts.length-2])/2, my=(pts[1]+pts[pts.length-1])/2;
+        return(<g key={i}><path d={a.path} fill="none" stroke={a.color} strokeWidth={2} markerEnd={`url(#chat-arr-${a.color.slice(1)})`} opacity={0.6}/><text x={mx} y={my-6} textAnchor="middle" fontSize={8} fill={a.color} fontWeight="600">{a.label}</text></g>);
+      })}
+      {services.map(s=>(
+        <g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/><text x={s.x+s.w/2} y={s.y+20} textAnchor="middle" fontSize={10} fill={s.stroke} fontWeight="700">{s.icon} {s.label}</text><text x={s.x+s.w/2} y={s.y+34} textAnchor="middle" fontSize={8} fill="#64748b">{s.sub}</text></g>
+      ))}
     </svg>
   );
 };
@@ -402,6 +495,369 @@ def handler(event, context):
               <div><strong>Why Array Jobs?</strong> Single submit fans out to 1,000 parallel containers. AWS Batch handles scheduling, retry, and SPOT instance management. No need to build your own parallelism.</div>
               <div><strong>Why FAISS over nmslib?</strong> FAISS performs better at large scale (80M+ vectors) and supports efficient memory-mapped indexing.</div>
               <div><strong>Monitoring:</strong> CloudWatch metrics on Batch job success rate, Lambda errors, SQS queue depth, DLQ depth, and OpenSearch indexing latency.</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Serverless RAG with Bedrock Knowledge Bases ═══ */}
+      {activeArch === "bedrock-rag-kb" && (
+        <div>
+          {/* Overview Banner */}
+          <div style={{ background: "#ede9fe", border: "2px solid #7c3aed", borderRadius: 14, padding: 18, marginBottom: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#5b21b6" }}>Serverless RAG with Bedrock Knowledge Bases</div>
+            <div style={{ fontSize: 12, color: "#4c1d95", marginTop: 4, lineHeight: 1.6 }}>
+              Fully managed RAG pipeline: upload documents to S3, Bedrock Knowledge Bases handles chunking, embedding, and vector storage automatically. Query via Bedrock Agent or RetrieveAndGenerate API — no infrastructure to manage.
+            </div>
+          </div>
+
+          {/* Architecture Diagram */}
+          <div style={{ background: "#f8fafc", borderRadius: 16, border: "2px solid #cbd5e1", padding: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#64748b", marginBottom: 10, textAlign: "center" }}>ARCHITECTURE DIAGRAM</div>
+            <RAGArchSVG />
+          </div>
+
+          {/* Key Components */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10, marginBottom: 20 }}>
+            {[
+              { label: "S3 Data Source", value: "Documents", icon: "🪣", color: "#059669", desc: "PDF, HTML, CSV, TXT, DOCX — auto-synced to KB" },
+              { label: "Bedrock KB", value: "Managed", icon: "📚", color: "#7c3aed", desc: "Auto chunking, embedding, and indexing" },
+              { label: "Vector Store", value: "OSS / Aurora / Pinecone", icon: "🗄️", color: "#2563eb", desc: "OpenSearch Serverless, Aurora PostgreSQL, or Pinecone" },
+              { label: "Foundation Model", value: "Claude / Titan", icon: "🧠", color: "#ec4899", desc: "Generates answers grounded in retrieved context" },
+            ].map(n => (
+              <div key={n.label} style={{ background: "#fff", border: "2px solid #e2e8f0", borderRadius: 12, padding: 14, textAlign: "center" }}>
+                <div style={{ fontSize: 22 }}>{n.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: n.color, marginTop: 2 }}>{n.value}</div>
+                <div style={{ fontSize: 11, color: "#334155", fontWeight: 700, marginTop: 2 }}>{n.label}</div>
+                <div style={{ fontSize: 10, color: "#64748b", marginTop: 4 }}>{n.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Ingestion Pipeline Detail */}
+          <div style={{ background: "#dbeafe", borderRadius: 14, border: "2px solid #2563eb", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#1e40af", marginBottom: 8 }}>Ingestion Pipeline (Fully Managed)</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+              {[
+                { step: "1", icon: "📤", title: "Upload to S3", desc: "Drop documents (PDF, HTML, CSV, TXT) into designated S3 bucket" },
+                { step: "2", icon: "🔄", title: "Start Sync Job", desc: "KB sync crawls S3, detects new/changed/deleted docs" },
+                { step: "3", icon: "✂️", title: "Chunking", desc: "Fixed-size, semantic, or hierarchical chunking with overlap" },
+                { step: "4", icon: "🧠", title: "Embedding", desc: "Titan Embeddings V2 or Cohere Embed — 1024 dimensions" },
+                { step: "5", icon: "📥", title: "Index Vectors", desc: "Vectors stored in OpenSearch Serverless (or Aurora/Pinecone)" },
+              ].map(s => (
+                <div key={s.step} style={{ background: "#fff", borderRadius: 10, padding: 12, border: "1px solid #93c5fd" }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: "#2563eb", marginBottom: 4 }}>STEP {s.step}</div>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{s.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1e40af" }}>{s.title}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Query Flow Detail */}
+          <div style={{ background: "#fce7f3", borderRadius: 14, border: "2px solid #ec4899", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#9d174d", marginBottom: 8 }}>Query Flow (RetrieveAndGenerate)</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+              {[
+                { step: "1", icon: "💬", title: "User Query", desc: "Natural language question sent via API or Bedrock Agent" },
+                { step: "2", icon: "🔢", title: "Query Embedding", desc: "Question converted to vector using same embedding model" },
+                { step: "3", icon: "🔍", title: "Vector Search", desc: "k-NN search in vector store returns top-k relevant chunks" },
+                { step: "4", icon: "🧠", title: "FM Generation", desc: "Retrieved chunks + query sent to Claude/Titan as context" },
+                { step: "5", icon: "📋", title: "Cited Response", desc: "Answer with source citations (S3 URI + chunk location)" },
+              ].map(s => (
+                <div key={s.step} style={{ background: "#fff", borderRadius: 10, padding: 12, border: "1px solid #f9a8d4" }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: "#ec4899", marginBottom: 4 }}>STEP {s.step}</div>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{s.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#9d174d" }}>{s.title}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* API Code Examples */}
+          <div style={{ background: "#d1fae5", borderRadius: 14, border: "2px solid #059669", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#065f46", marginBottom: 8 }}>Create Knowledge Base & Query</div>
+            <CodeBlock code={`# 1. Create Knowledge Base
+import boto3
+bedrock_agent = boto3.client("bedrock-agent")
+
+kb = bedrock_agent.create_knowledge_base(
+    name="product-docs-kb",
+    roleArn="arn:aws:iam::role/BedrockKBRole",
+    knowledgeBaseConfiguration={
+        "type": "VECTOR",
+        "vectorKnowledgeBaseConfiguration": {
+            "embeddingModelArn":
+              "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v2:0"
+        }
+    },
+    storageConfiguration={
+        "type": "OPENSEARCH_SERVERLESS",
+        "opensearchServerlessConfiguration": {
+            "collectionArn": "arn:aws:aoss:us-east-1::collection/abc123",
+            "vectorIndexName": "product-docs-index",
+            "fieldMapping": {
+                "vectorField": "embedding",
+                "textField": "text",
+                "metadataField": "metadata"
+            }
+        }
+    }
+)
+
+# 2. Add S3 data source
+bedrock_agent.create_data_source(
+    knowledgeBaseId=kb["knowledgeBase"]["knowledgeBaseId"],
+    name="s3-product-docs",
+    dataSourceConfiguration={
+        "type": "S3",
+        "s3Configuration": {
+            "bucketArn": "arn:aws:s3:::my-product-docs"
+        }
+    },
+    vectorIngestionConfiguration={
+        "chunkingConfiguration": {
+            "chunkingStrategy": "SEMANTIC",
+            "semanticChunkingConfiguration": {
+                "maxTokens": 512,
+                "bufferSize": 0,
+                "breakpointPercentileThreshold": 95
+            }
+        }
+    }
+)
+
+# 3. Query with RetrieveAndGenerate
+bedrock_rt = boto3.client("bedrock-agent-runtime")
+
+response = bedrock_rt.retrieve_and_generate(
+    input={"text": "How do I configure auto-scaling?"},
+    retrieveAndGenerateConfiguration={
+        "type": "KNOWLEDGE_BASE",
+        "knowledgeBaseConfiguration": {
+            "knowledgeBaseId": kb["knowledgeBase"]["knowledgeBaseId"],
+            "modelArn":
+              "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0",
+            "retrievalConfiguration": {
+                "vectorSearchConfiguration": {
+                    "numberOfResults": 5
+                }
+            }
+        }
+    }
+)
+print(response["output"]["text"])
+# Includes citations with S3 source URIs`} />
+          </div>
+
+          {/* Tradeoffs */}
+          <div style={{ background: "#fef3c7", borderRadius: 14, border: "2px solid #f59e0b", padding: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#92400e", marginBottom: 8 }}>Design Decisions & Tradeoffs</div>
+            <div style={{ fontSize: 12, color: "#78350f", lineHeight: 2 }}>
+              <div><strong>Why Bedrock KB over custom pipeline?</strong> Zero infrastructure management. Chunking, embedding, indexing, and retrieval are all handled. Ideal for teams that want RAG without building plumbing.</div>
+              <div><strong>Why OpenSearch Serverless?</strong> Auto-scales, no cluster management. Supports both vector search and metadata filtering. Cost scales with usage.</div>
+              <div><strong>When NOT to use Bedrock KB?</strong> If you need custom chunking logic, hybrid search with BM25, or more than 5 data sources per KB. Build your own pipeline (see S3 → OpenSearch tab).</div>
+              <div><strong>Chunking strategy choice:</strong> Semantic chunking preserves context better than fixed-size. Use hierarchical for long structured docs (parent-child retrieval).</div>
+              <div><strong>Vector store options:</strong> OpenSearch Serverless (default, best integration), Aurora PostgreSQL (if you already use Aurora), Pinecone (managed, multi-cloud), Redis Enterprise.</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Real-Time GenAI Chat Application ═══ */}
+      {activeArch === "genai-chat" && (
+        <div>
+          {/* Overview Banner */}
+          <div style={{ background: "#fce7f3", border: "2px solid #ec4899", borderRadius: 14, padding: 18, marginBottom: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#9d174d" }}>Real-Time GenAI Chat Application</div>
+            <div style={{ fontSize: 12, color: "#831843", marginTop: 4, lineHeight: 1.6 }}>
+              Serverless chat application with streaming responses, conversation memory, content safety guardrails, and multi-turn context. Built entirely on AWS managed services — no servers to manage.
+            </div>
+          </div>
+
+          {/* Architecture Diagram */}
+          <div style={{ background: "#f8fafc", borderRadius: 16, border: "2px solid #cbd5e1", padding: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#64748b", marginBottom: 10, textAlign: "center" }}>ARCHITECTURE DIAGRAM</div>
+            <ChatArchSVG />
+          </div>
+
+          {/* Key Components Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 20 }}>
+            {[
+              { label: "Frontend", value: "React SPA", icon: "🌐", color: "#2563eb", desc: "CloudFront + S3 static hosting" },
+              { label: "API Layer", value: "API Gateway", icon: "🔗", color: "#7c3aed", desc: "REST or WebSocket API with auth" },
+              { label: "Compute", value: "Lambda", icon: "⚡", color: "#d97706", desc: "Streaming via response URL or WebSocket" },
+              { label: "LLM", value: "Bedrock", icon: "🧠", color: "#ec4899", desc: "Claude / Titan with InvokeModelWithResponseStream" },
+              { label: "Safety", value: "Guardrails", icon: "🛡️", color: "#dc2626", desc: "Content filters, PII redaction, topic denial" },
+              { label: "Memory", value: "DynamoDB", icon: "💾", color: "#059669", desc: "Conversation history & session state" },
+            ].map(n => (
+              <div key={n.label} style={{ background: "#fff", border: "2px solid #e2e8f0", borderRadius: 12, padding: 12, textAlign: "center" }}>
+                <div style={{ fontSize: 22 }}>{n.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: n.color, marginTop: 2 }}>{n.value}</div>
+                <div style={{ fontSize: 11, color: "#334155", fontWeight: 700, marginTop: 2 }}>{n.label}</div>
+                <div style={{ fontSize: 10, color: "#64748b", marginTop: 4 }}>{n.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Request Flow */}
+          <div style={{ background: "#dbeafe", borderRadius: 14, border: "2px solid #2563eb", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#1e40af", marginBottom: 8 }}>Request Flow — User Message to Streaming Response</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+              {[
+                { step: "1", icon: "👤", title: "User Sends Message", desc: "React frontend sends message via API Gateway (REST POST or WebSocket)" },
+                { step: "2", icon: "🔐", title: "Auth & Rate Limit", desc: "Cognito JWT validation + API Gateway throttling (per-user rate limits)" },
+                { step: "3", icon: "💾", title: "Load History", desc: "Lambda fetches conversation history from DynamoDB (last N turns)" },
+                { step: "4", icon: "🛡️", title: "Guardrail Check", desc: "Bedrock Guardrails scans input for PII, harmful content, denied topics" },
+                { step: "5", icon: "🧠", title: "LLM Inference", desc: "InvokeModelWithResponseStream with system prompt + history + user message" },
+                { step: "6", icon: "📡", title: "Stream Response", desc: "Lambda streams tokens back to client; saves full response to DynamoDB" },
+              ].map(s => (
+                <div key={s.step} style={{ background: "#fff", borderRadius: 10, padding: 12, border: "1px solid #93c5fd" }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: "#2563eb", marginBottom: 4 }}>STEP {s.step}</div>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{s.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1e40af" }}>{s.title}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Conversation Memory Pattern */}
+          <div style={{ background: "#d1fae5", borderRadius: 14, border: "2px solid #059669", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#065f46", marginBottom: 8 }}>Conversation Memory — DynamoDB Schema</div>
+            <div style={{ fontSize: 12, color: "#064e3b", lineHeight: 1.8, marginBottom: 8 }}>
+              <div><strong>Partition key:</strong> <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>session_id</code> (UUID per conversation)</div>
+              <div><strong>Sort key:</strong> <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>turn_number</code> (integer, auto-increment)</div>
+              <div><strong>TTL:</strong> <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>expires_at</code> — auto-delete conversations after 24h</div>
+              <div><strong>Context window:</strong> Load last 10 turns (or until token budget ~80% exhausted)</div>
+            </div>
+            <CodeBlock code={`# DynamoDB Table Schema
+{
+  "TableName": "chat-conversations",
+  "KeySchema": [
+    {"AttributeName": "session_id", "KeyType": "HASH"},
+    {"AttributeName": "turn_number", "KeyType": "RANGE"}
+  ],
+  "AttributeDefinitions": [
+    {"AttributeName": "session_id", "AttributeType": "S"},
+    {"AttributeName": "turn_number", "AttributeType": "N"}
+  ],
+  "TimeToLiveSpecification": {
+    "AttributeName": "expires_at", "Enabled": true
+  },
+  "BillingMode": "PAY_PER_REQUEST"
+}
+
+# Each item stores one turn:
+{
+  "session_id": "abc-123-def",
+  "turn_number": 3,
+  "role": "user",          # or "assistant"
+  "content": "How do I configure auto-scaling?",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "token_count": 12,
+  "expires_at": 1737020000  # TTL epoch
+}`} />
+          </div>
+
+          {/* Streaming + Guardrails Code */}
+          <div style={{ background: "#ede9fe", borderRadius: 14, border: "2px solid #7c3aed", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#5b21b6", marginBottom: 8 }}>Lambda Handler — Streaming with Guardrails</div>
+            <CodeBlock code={`import boto3, json
+from datetime import datetime, timedelta
+
+bedrock = boto3.client("bedrock-runtime")
+dynamodb = boto3.resource("dynamodb").Table("chat-conversations")
+
+def handler(event, context):
+    body = json.loads(event["body"])
+    session_id = body["session_id"]
+    user_msg = body["message"]
+
+    # 1. Load conversation history (last 10 turns)
+    history = dynamodb.query(
+        KeyConditionExpression="session_id = :sid",
+        ExpressionAttributeValues={":sid": session_id},
+        ScanIndexForward=True, Limit=20  # last 10 pairs
+    )["Items"]
+
+    messages = [{"role": h["role"], "content": h["content"]}
+                for h in history]
+    messages.append({"role": "user", "content": user_msg})
+
+    # 2. Save user message to DynamoDB
+    turn = len(history) + 1
+    ttl = int((datetime.now() + timedelta(hours=24)).timestamp())
+    dynamodb.put_item(Item={
+        "session_id": session_id, "turn_number": turn,
+        "role": "user", "content": user_msg,
+        "timestamp": datetime.now().isoformat(),
+        "expires_at": ttl
+    })
+
+    # 3. Call Bedrock with streaming + guardrails
+    response = bedrock.invoke_model_with_response_stream(
+        modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        guardrailIdentifier="my-guardrail-id",
+        guardrailVersion="DRAFT",
+        body=json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 2048,
+            "system": "You are a helpful assistant...",
+            "messages": messages
+        })
+    )
+
+    # 4. Stream chunks back to client
+    full_response = ""
+    for event in response["body"]:
+        chunk = json.loads(event["chunk"]["bytes"])
+        if chunk["type"] == "content_block_delta":
+            text = chunk["delta"]["text"]
+            full_response += text
+            yield text  # stream to client
+
+    # 5. Save assistant response
+    dynamodb.put_item(Item={
+        "session_id": session_id, "turn_number": turn + 1,
+        "role": "assistant", "content": full_response,
+        "timestamp": datetime.now().isoformat(),
+        "expires_at": ttl
+    })`} />
+          </div>
+
+          {/* Guardrails Detail */}
+          <div style={{ background: "#fee2e2", borderRadius: 14, border: "2px solid #ef4444", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#991b1b", marginBottom: 8 }}>Bedrock Guardrails Configuration</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
+              {[
+                { icon: "🚫", title: "Content Filters", desc: "Block hate, violence, sexual content, insults. Configurable thresholds (LOW/MED/HIGH) for each category" },
+                { icon: "🔒", title: "PII Redaction", desc: "Detect and mask SSN, credit card, phone, email, addresses in both input and output" },
+                { icon: "📋", title: "Denied Topics", desc: "Define topics the model must refuse (competitor products, medical advice, financial advice)" },
+                { icon: "📝", title: "Word Filters", desc: "Block profanity and custom word lists. Managed + custom wordlists combined" },
+                { icon: "🎯", title: "Contextual Grounding", desc: "Ensures responses are grounded in source material — reduces hallucination in RAG" },
+                { icon: "📊", title: "ApplyGuardrail API", desc: "Can also apply guardrails independently (without model call) for input/output validation" },
+              ].map(g => (
+                <div key={g.title} style={{ background: "#fff", borderRadius: 10, padding: 12, border: "1px solid #fca5a5" }}>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{g.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#991b1b" }}>{g.title}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>{g.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tradeoffs */}
+          <div style={{ background: "#fef3c7", borderRadius: 14, border: "2px solid #f59e0b", padding: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#92400e", marginBottom: 8 }}>Design Decisions & Tradeoffs</div>
+            <div style={{ fontSize: 12, color: "#78350f", lineHeight: 2 }}>
+              <div><strong>REST vs WebSocket API?</strong> REST with Lambda response streaming URL is simpler. WebSocket is better if you need bi-directional communication (typing indicators, real-time status).</div>
+              <div><strong>Why DynamoDB for memory?</strong> Single-digit millisecond reads, auto-scales, TTL for auto-cleanup, pay-per-request pricing. No session server to manage.</div>
+              <div><strong>Why Guardrails at inference time?</strong> Applied on both input (pre-processing) and output (post-processing). Adds ~200ms latency but ensures content safety without custom code.</div>
+              <div><strong>Context window management:</strong> Load last N turns, not all history. Summarize older turns if needed. Monitor token count to stay within model limits and budget.</div>
+              <div><strong>Cost optimization:</strong> Use Prompt Caching for system prompts (reduces cost by 90% for cached tokens). Use Prompt Router to route simple queries to Haiku, complex to Sonnet.</div>
             </div>
           </div>
         </div>

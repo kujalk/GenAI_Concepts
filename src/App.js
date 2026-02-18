@@ -1,5 +1,4 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
@@ -23,7 +22,6 @@ import UsefulArchitectures from './pages/projects/UsefulArchitectures';
 
 export default function App() {
   return (
-    <ThemeProvider>
       <HashRouter>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -49,6 +47,5 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
-    </ThemeProvider>
   );
 }
