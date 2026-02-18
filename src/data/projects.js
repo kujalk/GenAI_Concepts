@@ -134,6 +134,14 @@ const projects = [
   icon: "🏗️",
   tags: ["React", "AWS", "Architecture", "OpenSearch"],
   path: "/useful-architectures",
+  },
+  {
+  id: "Glue-Crawlers-And-Data-Catalog",
+  title: "Glue Crawlers and Data Catalog",
+  description: "Deep dive into AWS Glue Crawlers and Data Catalog — how they work together to make S3 data queryable",
+  icon: "📊",
+  tags: ["React", "AWS", "Glue", "Data Catalog"],
+  path: "/glue-crawlers-and-data-catalog",
   }
 
 ];

@@ -19,6 +19,7 @@ import MCPServerArchitecture from './pages/projects/MCPServerArchitecture';
 import LLMTrainingAndFineTuning from './pages/projects/LLMTrainingAndFineTuning';
 import SageMakerLineage from './pages/projects/SageMakerLineage';
 import UsefulArchitectures from './pages/projects/UsefulArchitectures';
+import GlueAthenaGuide from './pages/projects/GlueAthenaGuide';
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/llm-training-and-finetuning" element={<LLMTrainingAndFineTuning />} />
             <Route path="/sagemaker-lineage" element={<SageMakerLineage />} />
             <Route path="/useful-architectures" element={<UsefulArchitectures />} />
+            <Route path="/glue-crawlers-and-data-catalog" element={<GlueAthenaGuide />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
