@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import projects from '../data/projects';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { dark, toggle } = useTheme();
 
   const navItems = [
     { path: '/', title: 'Home', icon: '🏠' },
@@ -38,7 +40,16 @@ export default function Layout() {
         } lg:translate-x-0`}
       >
         <div className="p-4">
-          <h2 className="text-xl font-bold text-white mb-6 mt-2">AWS GenAI Concepts</h2>
+          <div className="flex items-center justify-between mb-6 mt-2">
+            <h2 className="text-xl font-bold text-white">AWS GenAI Concepts</h2>
+            <button
+              onClick={toggle}
+              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-lg transition-colors"
+              title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {dark ? '☀️' : '🌙'}
+            </button>
+          </div>
           <nav className="space-y-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -71,7 +82,7 @@ export default function Layout() {
       )}
 
       {/* Main Content */}
-      <main className="lg:ml-64 min-h-screen">
+      <main className={`lg:ml-64 min-h-screen ${dark ? 'dark-content' : ''}`}>
         <Outlet />
       </main>
     </div>

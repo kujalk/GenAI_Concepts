@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 
-const tabs = ["overview", "profiles", "crossregion", "routing", "provisioned", "compare", "quiz"];
-const tabLabels = { overview: "🗺️ Big Picture", profiles: "📋 Inference Profiles", crossregion: "🌍 Cross-Region", routing: "🧠 Intelligent Routing", provisioned: "⚡ Provisioned Throughput", compare: "📊 Compare All", quiz: "🧪 Quiz" };
+const tabs = ["overview", "profiles", "crossregion", "routing", "provisioned", "promptflow", "compare", "quiz"];
+const tabLabels = { overview: "🗺️ Big Picture", profiles: "📋 Inference Profiles", crossregion: "🌍 Cross-Region", routing: "🧠 Intelligent Routing", provisioned: "⚡ Provisioned Throughput", promptflow: "🔀 Prompt Flows", compare: "📊 Compare All", quiz: "🧪 Quiz" };
 
 const QuizCard = ({ q, opts, ans, explanation }) => {
   const [picked, setPicked] = useState(null);
@@ -493,6 +493,136 @@ export default function App() {
 
           <div style={{ marginTop: 16, background: "#fef3c7", borderRadius: 12, border: "2px solid #f59e0b", padding: 14 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "#92400e" }}>🧠 Exam Tip: Provisioned Throughput = <strong>"guaranteed, dedicated, no throttling, commitment-based"</strong>. Also required for <strong>custom/fine-tuned models</strong> in Bedrock.</div>
+          </div>
+        </div>
+      )}
+
+      {/* ============ PROMPT FLOWS ============ */}
+      {tab === "promptflow" && (
+        <div>
+          <SectionBanner bg="#fce7f3" border="#ec4899" color="#9d174d" icon="🔀" title="Bedrock Prompt Flows, Templates & Router" subtitle="Visual orchestration of prompts, models, and logic — no code required" />
+
+          {/* What is Prompt Flow */}
+          <div style={{ background: "#fff0f6", border: "2px solid #ec4899", borderRadius: 14, padding: 18, marginBottom: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#9d174d", marginBottom: 8 }}>What is a Prompt Flow?</div>
+            <div style={{ fontSize: 13, color: "#334155", lineHeight: 1.8 }}>
+              A <strong>Prompt Flow</strong> is a visual, no-code/low-code workflow builder in Bedrock. You chain together <strong>nodes</strong> — inputs, prompt templates, model invocations, conditions, and outputs — into a directed flow. Think of it as <strong>Step Functions for LLMs</strong>: you design the pipeline visually, and Bedrock executes it end-to-end.
+            </div>
+          </div>
+
+          {/* Three concepts */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, marginBottom: 20 }}>
+            <div style={{ background: "#fff", borderRadius: 14, border: "2px solid #3b82f6", padding: 18 }}>
+              <div style={{ fontSize: 28, textAlign: "center" }}>📝</div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: "#1d4ed8", textAlign: "center", marginTop: 4 }}>Prompt Template</div>
+              <div style={{ fontSize: 12, color: "#475569", marginTop: 8, lineHeight: 1.7 }}>
+                A <strong>reusable prompt with variables</strong>. Define placeholders like <code style={{ background: "#dbeafe", padding: "1px 5px", borderRadius: 4, fontSize: 11 }}>{"{{topic}}"}</code> that get filled at runtime. Versioned and shareable across your organization.
+              </div>
+              <div style={{ marginTop: 10, background: "#f1f5f9", borderRadius: 8, padding: 10, fontFamily: "monospace", fontSize: 11, color: "#334155", lineHeight: 1.6 }}>
+                Summarize the following {"{{document}}"}{"\n"}in {"{{style}}"} tone.{"\n"}Focus on: {"{{focus_areas}}"}
+              </div>
+            </div>
+            <div style={{ background: "#fff", borderRadius: 14, border: "2px solid #10b981", padding: 18 }}>
+              <div style={{ fontSize: 28, textAlign: "center" }}>🧠</div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: "#065f46", textAlign: "center", marginTop: 4 }}>Prompt Router</div>
+              <div style={{ fontSize: 12, color: "#475569", marginTop: 8, lineHeight: 1.7 }}>
+                Analyzes each prompt's <strong>complexity</strong> and routes to the optimal model. Simple prompts go to cheaper models (Haiku), complex ones to powerful models (Sonnet). You set a <strong>fallback percentage</strong> threshold.
+              </div>
+              <div style={{ marginTop: 10, background: "#d1fae5", borderRadius: 8, padding: 10, fontSize: 11, color: "#065f46", lineHeight: 1.6 }}>
+                <strong>Config:</strong> Small model (Haiku) + Large model (Sonnet) + Fallback % to large model
+              </div>
+            </div>
+            <div style={{ background: "#fff", borderRadius: 14, border: "2px solid #ec4899", padding: 18 }}>
+              <div style={{ fontSize: 28, textAlign: "center" }}>🔀</div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: "#9d174d", textAlign: "center", marginTop: 4 }}>Prompt Flow</div>
+              <div style={{ fontSize: 12, color: "#475569", marginTop: 8, lineHeight: 1.7 }}>
+                The <strong>orchestration layer</strong> that connects templates, models, routers, and logic into an end-to-end pipeline. Drag-and-drop nodes in the console. Invoke the whole flow with a single API call.
+              </div>
+              <div style={{ marginTop: 10, background: "#fce7f3", borderRadius: 8, padding: 10, fontSize: 11, color: "#9d174d", lineHeight: 1.6 }}>
+                <strong>Nodes:</strong> Input → Prompt → Model → Condition → Output
+              </div>
+            </div>
+          </div>
+
+          {/* How they connect */}
+          <div style={{ background: "#f8fafc", borderRadius: 16, border: "2px solid #ec4899", padding: 24, marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#9d174d", marginBottom: 16, textAlign: "center" }}>HOW THEY ALL CONNECT</div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <FlowBox icon="👨‍💻" label="User Input" desc='{"topic": "AI", "style": "formal"}' bg="#fff" border="#0f172a" w={250} />
+              <ArrowDown color="#ec4899" label="variables injected" />
+              <FlowBox icon="📝" label="Prompt Template" desc='Summarize {{topic}} in {{style}} tone' bg="#dbeafe" border="#3b82f6" w={250} />
+              <ArrowDown color="#ec4899" label="assembled prompt" />
+              <div style={{ background: "#d1fae5", border: "2px solid #10b981", borderRadius: 14, padding: 14, width: 280, textAlign: "center" }}>
+                <div style={{ fontSize: 20 }}>🧠</div>
+                <div style={{ fontWeight: 800, fontSize: 13, color: "#065f46" }}>Prompt Router (optional)</div>
+                <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>Evaluates complexity → routes to optimal model</div>
+                <div style={{ display: "flex", gap: 16, marginTop: 8, justifyContent: "center" }}>
+                  <div style={{ background: "#fff", borderRadius: 8, padding: "6px 12px", border: "1px solid #10b981" }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#065f46" }}>Simple</div>
+                    <div style={{ fontSize: 9, color: "#475569" }}>→ Haiku ($)</div>
+                  </div>
+                  <div style={{ background: "#fff", borderRadius: 8, padding: "6px 12px", border: "1px solid #f59e0b" }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#92400e" }}>Complex</div>
+                    <div style={{ fontSize: 9, color: "#475569" }}>→ Sonnet ($$$)</div>
+                  </div>
+                </div>
+              </div>
+              <ArrowDown color="#ec4899" label="model response" />
+              <FlowBox icon="⚙️" label="Condition Node" desc="Check quality score, length, etc." bg="#ede9fe" border="#8b5cf6" w={250} />
+              <ArrowDown color="#ec4899" label="passes validation" />
+              <FlowBox icon="📤" label="Output" desc="Return final result to caller" bg="#fef3c7" border="#f59e0b" w={250} />
+            </div>
+          </div>
+
+          {/* Node Types */}
+          <div style={{ background: "#fff", borderRadius: 14, border: "2px solid #cbd5e1", padding: 20, marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", marginBottom: 12 }}>Prompt Flow Node Types</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
+              {[
+                { icon: "📥", name: "Input", desc: "Entry point — accepts user variables", color: "#3b82f6", bg: "#dbeafe" },
+                { icon: "📝", name: "Prompt", desc: "Template with variable substitution", color: "#8b5cf6", bg: "#ede9fe" },
+                { icon: "🤖", name: "Model", desc: "Invoke a Bedrock FM or custom model", color: "#10b981", bg: "#d1fae5" },
+                { icon: "🔀", name: "Condition", desc: "Branch logic based on output", color: "#f59e0b", bg: "#fef3c7" },
+                { icon: "🗄️", name: "Knowledge Base", desc: "Query a RAG knowledge base", color: "#ec4899", bg: "#fce7f3" },
+                { icon: "🛠️", name: "Lambda", desc: "Run custom code (validation, transform)", color: "#ef4444", bg: "#fee2e2" },
+                { icon: "🔄", name: "Iterator", desc: "Loop over a collection of items", color: "#6366f1", bg: "#e0e7ff" },
+                { icon: "📤", name: "Output", desc: "Return final result", color: "#0f172a", bg: "#f1f5f9" },
+              ].map(n => (
+                <div key={n.name} style={{ background: n.bg, borderRadius: 10, padding: 12, border: `2px solid ${n.color}`, textAlign: "center" }}>
+                  <div style={{ fontSize: 22 }}>{n.icon}</div>
+                  <div style={{ fontWeight: 700, fontSize: 12, color: n.color, marginTop: 4 }}>{n.name}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 2 }}>{n.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Use cases */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+            <div style={{ background: "#d1fae5", borderRadius: 14, border: "2px solid #10b981", padding: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#065f46", marginBottom: 8 }}>When to Use Prompt Flows</div>
+              <div style={{ fontSize: 12, color: "#065f46", lineHeight: 1.8 }}>
+                <div>• Multi-step LLM pipelines (classify → generate → validate)</div>
+                <div>• Chaining prompts with conditional branching</div>
+                <div>• RAG + generation in one workflow</div>
+                <div>• Cost-optimized routing with fallback logic</div>
+                <div>• Reusable prompt templates across teams</div>
+              </div>
+            </div>
+            <div style={{ background: "#fef3c7", borderRadius: 14, border: "2px solid #f59e0b", padding: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#92400e", marginBottom: 8 }}>Key Benefits</div>
+              <div style={{ fontSize: 12, color: "#78350f", lineHeight: 1.8 }}>
+                <div>• No code required — visual drag-and-drop builder</div>
+                <div>• Version-controlled prompt templates</div>
+                <div>• Single API call invokes entire flow</div>
+                <div>• Built-in prompt router integration</div>
+                <div>• Testable in console before deployment</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ background: "#fef3c7", borderRadius: 12, border: "2px solid #f59e0b", padding: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#92400e" }}>🧠 Exam Tip: <strong>Prompt Flow</strong> = visual orchestration ("Step Functions for LLMs"). <strong>Prompt Template</strong> = reusable prompt with variables. <strong>Prompt Router</strong> = cost-optimized model selection based on complexity. They compose: a Flow can contain Templates and use a Router.</div>
           </div>
         </div>
       )}

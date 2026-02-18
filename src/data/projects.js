@@ -126,6 +126,14 @@ const projects = [
   icon: "🔗",
   tags: ["React", "AWS", "SageMaker", "Bedrock", "MLOps"],
   path: "/sagemaker-lineage",
+  },
+  {
+  id: "useful-architectures",
+  title: "Useful AWS Architectures",
+  description: "Production-ready reference architectures for ML data ingestion, vector search, and more",
+  icon: "🏗️",
+  tags: ["React", "AWS", "Architecture", "OpenSearch"],
+  path: "/useful-architectures",
   }
 
 ];

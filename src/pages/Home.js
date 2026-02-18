@@ -1,12 +1,24 @@
 import projects from '../data/projects';
 import ProjectCard from '../components/ProjectCard';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Home() {
+  const { dark, toggle } = useTheme();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
         <header className="text-center mb-16">
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={toggle}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-lg transition-colors"
+              title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {dark ? '☀️' : '🌙'}
+            </button>
+          </div>
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
             AWS GenAI Concepts
           </h1>

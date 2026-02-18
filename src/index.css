@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Dark mode for inline-styled project pages */
+.dark-content {
+  background: #0f172a;
+  min-height: 100vh;
+}
+.dark-content > * {
+  filter: invert(1) hue-rotate(180deg);
+}
+.dark-content > * img,
+.dark-content > * svg {
+  filter: invert(1) hue-rotate(180deg);
+}
