@@ -4,6 +4,7 @@ const archTabs = [
   { id: "s3-opensearch", label: "S3 → OpenSearch Ingestion", icon: "📄" },
   { id: "bedrock-rag-kb", label: "Serverless RAG with Bedrock KB", icon: "📚" },
   { id: "genai-chat", label: "Real-Time GenAI Chat App", icon: "💬" },
+  { id: "token-metering", label: "Token Metering & Budget Enforcement", icon: "🪙" },
 ];
 
 const CodeBlock = ({ code }) => (
@@ -190,6 +191,63 @@ const ChatArchSVG = () => {
         const pts=a.path.match(/[\d.]+/g).map(Number);
         const mx=(pts[0]+pts[pts.length-2])/2, my=(pts[1]+pts[pts.length-1])/2;
         return(<g key={i}><path d={a.path} fill="none" stroke={a.color} strokeWidth={2} markerEnd={`url(#chat-arr-${a.color.slice(1)})`} opacity={0.6}/><text x={mx} y={my-6} textAnchor="middle" fontSize={8} fill={a.color} fontWeight="600">{a.label}</text></g>);
+      })}
+      {services.map(s=>(
+        <g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/><text x={s.x+s.w/2} y={s.y+20} textAnchor="middle" fontSize={10} fill={s.stroke} fontWeight="700">{s.icon} {s.label}</text><text x={s.x+s.w/2} y={s.y+34} textAnchor="middle" fontSize={8} fill="#64748b">{s.sub}</text></g>
+      ))}
+    </svg>
+  );
+};
+
+// ─── Token Metering Architecture SVG ───
+const TokenMeteringSVG = () => {
+  const services = [
+    // Row 1: Entry
+    { id: "tenant", x: 10, y: 20, w: 100, h: 55, label: "Tenant App", sub: "Per-tenant API key", fill: "#fef3c7", stroke: "#d97706", icon: "👤" },
+    { id: "apigw", x: 150, y: 20, w: 120, h: 55, label: "API Gateway", sub: "Usage Plan + Key", fill: "#ede9fe", stroke: "#7c3aed", icon: "🔗" },
+    { id: "meter", x: 310, y: 20, w: 130, h: 55, label: "Metering Lambda", sub: "Budget Check + Log", fill: "#dbeafe", stroke: "#2563eb", icon: "🪙" },
+    { id: "bedrock", x: 490, y: 20, w: 130, h: 55, label: "Amazon Bedrock", sub: "FM Inference", fill: "#fce7f3", stroke: "#ec4899", icon: "🧠" },
+    // Row 2: Storage
+    { id: "dynamo", x: 150, y: 140, w: 140, h: 55, label: "DynamoDB", sub: "Token Usage + Budgets", fill: "#d1fae5", stroke: "#059669", icon: "💾" },
+    { id: "cloudwatch", x: 350, y: 140, w: 130, h: 55, label: "CloudWatch", sub: "Metrics + Alarms", fill: "#e0e7ff", stroke: "#4f46e5", icon: "📊" },
+    // Row 3: Policy + Reporting
+    { id: "policy", x: 10, y: 140, w: 110, h: 55, label: "Policy Engine", sub: "Budget Rules", fill: "#fee2e2", stroke: "#dc2626", icon: "📋" },
+    { id: "dashboard", x: 530, y: 140, w: 110, h: 55, label: "Dashboard", sub: "Per-Tenant Reports", fill: "#fef3c7", stroke: "#d97706", icon: "📈" },
+    // Row 3: Post-processing
+    { id: "post", x: 490, y: 260, w: 130, h: 55, label: "Post-Process Lambda", sub: "Log Output Tokens", fill: "#dbeafe", stroke: "#2563eb", icon: "📝" },
+    { id: "sns", x: 310, y: 260, w: 130, h: 55, label: "Amazon SNS", sub: "Budget Alerts", fill: "#fee2e2", stroke: "#dc2626", icon: "🔔" },
+  ];
+  const arrows = [
+    { path: "M110,47 L150,47", color: "#7c3aed", label: "request" },
+    { path: "M270,47 L310,47", color: "#2563eb", label: "check budget" },
+    { path: "M440,47 L490,47", color: "#ec4899", label: "invoke FM" },
+    { path: "M375,75 L375,140", color: "#059669", label: "read/write" },
+    { path: "M375,75 L415,140", color: "#4f46e5", label: "metrics" },
+    { path: "M120,167 L150,167", color: "#059669", label: "rules" },
+    { path: "M480,167 L530,167", color: "#d97706", label: "reports" },
+    { path: "M555,75 L555,260", color: "#2563eb", label: "response" },
+    { path: "M490,287 L440,287", color: "#dc2626", label: "over budget?" },
+    { path: "M220,195 L220,260 L310,287", color: "#059669", label: "usage log" },
+  ];
+  return (
+    <svg viewBox="0 0 670 340" style={{ width: "100%", maxWidth: 670, display: "block", margin: "0 auto" }}>
+      <defs>
+        {["#7c3aed","#2563eb","#ec4899","#059669","#d97706","#dc2626","#4f46e5"].map(c=>(
+          <marker key={c} id={`tm-arr-${c.slice(1)}`} viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0 0, 10 3.5, 0 7" fill={c}/>
+          </marker>
+        ))}
+      </defs>
+      <rect x="130" y="5" width="310" height="80" rx="10" fill="#dbeafe" opacity="0.12" stroke="#2563eb" strokeWidth="1" strokeDasharray="4"/>
+      <text x="140" y="16" fontSize="8" fill="#2563eb" fontWeight="700">PRE-INFERENCE METERING</text>
+      <rect x="130" y="120" width="530" height="90" rx="10" fill="#d1fae5" opacity="0.1" stroke="#059669" strokeWidth="1" strokeDasharray="4"/>
+      <text x="140" y="133" fontSize="8" fill="#059669" fontWeight="700">STORAGE & REPORTING</text>
+      <rect x="290" y="240" width="280" height="90" rx="10" fill="#fee2e2" opacity="0.1" stroke="#dc2626" strokeWidth="1" strokeDasharray="4"/>
+      <text x="300" y="253" fontSize="8" fill="#dc2626" fontWeight="700">POST-INFERENCE LOGGING & ALERTS</text>
+      {arrows.map((a,i)=>{
+        const pts=a.path.match(/[\d.]+/g).map(Number);
+        const mx=(pts[0]+pts[pts.length-2])/2, my=(pts[1]+pts[pts.length-1])/2;
+        return(<g key={i}><path d={a.path} fill="none" stroke={a.color} strokeWidth={2} markerEnd={`url(#tm-arr-${a.color.slice(1)})`} opacity={0.6}/><text x={mx} y={my-6} textAnchor="middle" fontSize={7} fill={a.color} fontWeight="600">{a.label}</text></g>);
       })}
       {services.map(s=>(
         <g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/><text x={s.x+s.w/2} y={s.y+20} textAnchor="middle" fontSize={10} fill={s.stroke} fontWeight="700">{s.icon} {s.label}</text><text x={s.x+s.w/2} y={s.y+34} textAnchor="middle" fontSize={8} fill="#64748b">{s.sub}</text></g>
@@ -858,6 +916,307 @@ def handler(event, context):
               <div><strong>Why Guardrails at inference time?</strong> Applied on both input (pre-processing) and output (post-processing). Adds ~200ms latency but ensures content safety without custom code.</div>
               <div><strong>Context window management:</strong> Load last N turns, not all history. Summarize older turns if needed. Monitor token count to stay within model limits and budget.</div>
               <div><strong>Cost optimization:</strong> Use Prompt Caching for system prompts (reduces cost by 90% for cached tokens). Use Prompt Router to route simple queries to Haiku, complex to Sonnet.</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Token Metering & Budget Enforcement ═══ */}
+      {activeArch === "token-metering" && (
+        <div>
+          {/* Overview Banner */}
+          <div style={{ background: "#dbeafe", border: "2px solid #2563eb", borderRadius: 14, padding: 18, marginBottom: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#1e40af" }}>Token Metering & Per-Tenant Budget Enforcement</div>
+            <div style={{ fontSize: 12, color: "#1e3a5f", marginTop: 4, lineHeight: 1.6 }}>
+              A structured token metering layer that logs input and output tokens for every request through API Gateway, stores metrics in DynamoDB and CloudWatch for per-tenant reporting, and enforces configurable token budgets at the Lambda layer before calling Bedrock. Critical workloads can receive elevated limits through policy rules.
+            </div>
+          </div>
+
+          {/* Architecture Diagram */}
+          <div style={{ background: "#f8fafc", borderRadius: 16, border: "2px solid #cbd5e1", padding: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#64748b", marginBottom: 10, textAlign: "center" }}>ARCHITECTURE DIAGRAM</div>
+            <TokenMeteringSVG />
+          </div>
+
+          {/* Key Metrics Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, marginBottom: 20 }}>
+            {[
+              { label: "Input Tokens", value: "Logged", icon: "📥", color: "#2563eb", desc: "Counted before FM call via tokenizer or API response" },
+              { label: "Output Tokens", value: "Logged", icon: "📤", color: "#7c3aed", desc: "Captured from Bedrock response metadata" },
+              { label: "Budget Check", value: "< 5ms", icon: "🪙", color: "#d97706", desc: "DynamoDB point-read of tenant usage vs limit" },
+              { label: "Granularity", value: "Per Tenant", icon: "👥", color: "#059669", desc: "Track by tenant, project, environment, or model" },
+              { label: "Alert Threshold", value: "80% / 100%", icon: "🔔", color: "#dc2626", desc: "Warning at 80%, hard block at 100% of budget" },
+              { label: "Policy Override", value: "Configurable", icon: "📋", color: "#4f46e5", desc: "Elevated limits for critical workloads via rules" },
+            ].map(n => (
+              <div key={n.label} style={{ background: "#fff", border: "2px solid #e2e8f0", borderRadius: 12, padding: 12, textAlign: "center" }}>
+                <div style={{ fontSize: 22 }}>{n.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: n.color, marginTop: 2 }}>{n.value}</div>
+                <div style={{ fontSize: 11, color: "#334155", fontWeight: 700, marginTop: 2 }}>{n.label}</div>
+                <div style={{ fontSize: 10, color: "#64748b", marginTop: 4 }}>{n.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Request Flow */}
+          <div style={{ background: "#dbeafe", borderRadius: 14, border: "2px solid #2563eb", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#1e40af", marginBottom: 8 }}>Request Flow — Pre-Inference Budget Check</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+              {[
+                { step: "1", icon: "👤", title: "Tenant Request", desc: "App sends prompt to API Gateway with tenant API key in header (x-api-key)" },
+                { step: "2", icon: "🔗", title: "API Gateway", desc: "Validates API key, applies usage plan rate/burst limits, routes to metering Lambda" },
+                { step: "3", icon: "🪙", title: "Estimate Input Tokens", desc: "Lambda estimates input tokens using tiktoken/tokenizer or prompt character heuristic" },
+                { step: "4", icon: "💾", title: "Check Budget", desc: "DynamoDB point-read: current_usage + estimated_tokens vs budget_limit for this tenant" },
+                { step: "5", icon: "📋", title: "Evaluate Policy", desc: "If over budget, check policy rules — critical workloads may have elevated limits or exemptions" },
+                { step: "6", icon: "🧠", title: "Call Bedrock (or Reject)", desc: "If within budget → invoke FM. If over → return 429 with budget details and reset time" },
+              ].map(s => (
+                <div key={s.step} style={{ background: "#fff", borderRadius: 10, padding: 12, border: "1px solid #93c5fd" }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: "#2563eb", marginBottom: 4 }}>STEP {s.step}</div>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{s.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1e40af" }}>{s.title}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Post-Inference Logging */}
+          <div style={{ background: "#ede9fe", borderRadius: 14, border: "2px solid #7c3aed", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#5b21b6", marginBottom: 8 }}>Post-Inference — Token Logging & Usage Update</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+              {[
+                { step: "1", icon: "📡", title: "Bedrock Response", desc: "Response includes usage metadata: inputTokens, outputTokens, totalTokens in response headers" },
+                { step: "2", icon: "📝", title: "Log Actual Tokens", desc: "Post-process Lambda records exact input + output token counts (not estimates) to DynamoDB" },
+                { step: "3", icon: "📊", title: "Emit CloudWatch Metrics", desc: "PutMetricData with dimensions: tenant_id, model_id, environment — enables dashboards and alarms" },
+                { step: "4", icon: "🔄", title: "Atomic Usage Update", desc: "DynamoDB UpdateItem with ADD to atomically increment tenant's cumulative token count" },
+                { step: "5", icon: "🔔", title: "Budget Alert Check", desc: "If usage crosses 80% or 100% threshold, publish to SNS topic → email/Slack notification" },
+              ].map(s => (
+                <div key={s.step} style={{ background: "#fff", borderRadius: 10, padding: 12, border: "1px solid #c4b5fd" }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: "#7c3aed", marginBottom: 4 }}>STEP {s.step}</div>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{s.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#5b21b6" }}>{s.title}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DynamoDB Schema */}
+          <div style={{ background: "#d1fae5", borderRadius: 14, border: "2px solid #059669", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#065f46", marginBottom: 8 }}>DynamoDB Schema — Usage Tracking & Budget Policies</div>
+            <div style={{ fontSize: 12, color: "#064e3b", lineHeight: 1.8, marginBottom: 8 }}>
+              <div><strong>Table 1 — Token Usage:</strong> PK = <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>TENANT#tenant_id</code>, SK = <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>PERIOD#2025-01</code> (monthly rollup)</div>
+              <div><strong>Table 2 — Request Log:</strong> PK = <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>TENANT#tenant_id</code>, SK = <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>REQ#timestamp#request_id</code> (per-request detail)</div>
+              <div><strong>Table 3 — Budget Policies:</strong> PK = <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>TENANT#tenant_id</code>, SK = <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>POLICY#default</code> (budget rules + overrides)</div>
+              <div><strong>Atomic counters:</strong> <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>UpdateExpression: ADD input_tokens :in, output_tokens :out</code></div>
+            </div>
+            <CodeBlock code={`# Token Usage Table — Monthly Rollup per Tenant
+{
+  "pk": "TENANT#acme-corp",
+  "sk": "PERIOD#2025-01",
+  "input_tokens": 2450000,
+  "output_tokens": 1230000,
+  "total_tokens": 3680000,
+  "request_count": 15420,
+  "budget_limit": 5000000,      # monthly token budget
+  "budget_used_pct": 73.6,
+  "last_updated": "2025-01-18T14:30:00Z"
+}
+
+# Budget Policy Table — Per-Tenant Rules
+{
+  "pk": "TENANT#acme-corp",
+  "sk": "POLICY#default",
+  "monthly_budget": 5000000,
+  "daily_budget": 200000,
+  "warn_threshold_pct": 80,
+  "hard_limit_pct": 100,
+  "allow_burst": false,
+  "overrides": [
+    {
+      "workload_tag": "mission-critical",
+      "monthly_budget": 10000000,   # 2x elevated limit
+      "allow_burst": true,
+      "approved_by": "platform-lead",
+      "expires": "2025-03-31"
+    }
+  ]
+}
+
+# Per-Request Log — Granular Audit Trail
+{
+  "pk": "TENANT#acme-corp",
+  "sk": "REQ#2025-01-18T14:30:00Z#req-abc123",
+  "model_id": "anthropic.claude-3-5-sonnet-v2",
+  "input_tokens": 450,
+  "output_tokens": 320,
+  "latency_ms": 1250,
+  "workload_tag": "customer-support",
+  "environment": "production",
+  "budget_remaining": 1320000,
+  "ttl": 1742515200   # auto-expire after 90 days
+}`} />
+          </div>
+
+          {/* Metering Lambda Code */}
+          <div style={{ background: "#fce7f3", borderRadius: 14, border: "2px solid #ec4899", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#9d174d", marginBottom: 8 }}>Metering Lambda — Budget Check & FM Call</div>
+            <CodeBlock code={`import boto3, json, time
+from datetime import datetime
+
+bedrock = boto3.client("bedrock-runtime")
+dynamodb = boto3.resource("dynamodb")
+usage_table = dynamodb.Table("token-usage")
+policy_table = dynamodb.Table("budget-policies")
+cloudwatch = boto3.client("cloudwatch")
+
+def handler(event, context):
+    body = json.loads(event["body"])
+    tenant_id = event["requestContext"]["identity"]["apiKeyId"]
+    workload_tag = body.get("workload_tag", "default")
+    period = datetime.now().strftime("%Y-%m")
+
+    # 1. Get current usage + budget policy
+    usage = usage_table.get_item(
+        Key={"pk": f"TENANT#{tenant_id}", "sk": f"PERIOD#{period}"}
+    ).get("Item", {"total_tokens": 0})
+
+    policy = policy_table.get_item(
+        Key={"pk": f"TENANT#{tenant_id}", "sk": "POLICY#default"}
+    ).get("Item", {"monthly_budget": 1000000})
+
+    # 2. Resolve effective budget (check overrides)
+    budget = policy["monthly_budget"]
+    for override in policy.get("overrides", []):
+        if override["workload_tag"] == workload_tag:
+            if override.get("expires", "9999") >= datetime.now().isoformat():
+                budget = override["monthly_budget"]
+                break
+
+    # 3. Estimate input tokens (~4 chars per token heuristic)
+    estimated_input = len(body["prompt"]) // 4
+
+    # 4. Budget enforcement
+    current = usage["total_tokens"]
+    if current + estimated_input > budget:
+        return {
+            "statusCode": 429,
+            "body": json.dumps({
+                "error": "TOKEN_BUDGET_EXCEEDED",
+                "tenant_id": tenant_id,
+                "current_usage": current,
+                "budget_limit": budget,
+                "resets_at": f"{period}-01T00:00:00Z"
+            })
+        }
+
+    # 5. Call Bedrock
+    response = bedrock.invoke_model(
+        modelId=body.get("model_id", "anthropic.claude-3-5-sonnet-20241022-v2:0"),
+        body=json.dumps(body["payload"])
+    )
+    result = json.loads(response["body"].read())
+
+    # 6. Extract actual token counts from response
+    input_tokens = result["usage"]["input_tokens"]
+    output_tokens = result["usage"]["output_tokens"]
+
+    # 7. Atomic usage update in DynamoDB
+    usage_table.update_item(
+        Key={"pk": f"TENANT#{tenant_id}", "sk": f"PERIOD#{period}"},
+        UpdateExpression="""ADD input_tokens :in, output_tokens :out,
+                           total_tokens :total, request_count :one""",
+        ExpressionAttributeValues={
+            ":in": input_tokens, ":out": output_tokens,
+            ":total": input_tokens + output_tokens, ":one": 1
+        }
+    )
+
+    # 8. Emit CloudWatch metrics
+    cloudwatch.put_metric_data(
+        Namespace="GenAI/TokenMetering",
+        MetricData=[
+            {"MetricName": "InputTokens", "Value": input_tokens,
+             "Dimensions": [{"Name": "TenantId", "Value": tenant_id},
+                            {"Name": "ModelId", "Value": body.get("model_id")}]},
+            {"MetricName": "OutputTokens", "Value": output_tokens,
+             "Dimensions": [{"Name": "TenantId", "Value": tenant_id},
+                            {"Name": "ModelId", "Value": body.get("model_id")}]},
+        ]
+    )
+
+    # 9. Check alert thresholds
+    new_total = current + input_tokens + output_tokens
+    pct = (new_total / budget) * 100
+    if pct >= policy.get("warn_threshold_pct", 80):
+        sns = boto3.client("sns")
+        sns.publish(
+            TopicArn="arn:aws:sns:us-east-1:123456789012:budget-alerts",
+            Subject=f"Token Budget Alert: {tenant_id} at {pct:.0f}%",
+            Message=json.dumps({"tenant": tenant_id, "usage_pct": pct,
+                                "used": new_total, "budget": budget})
+        )
+
+    return {"statusCode": 200, "body": response["body"].read()}`} />
+          </div>
+
+          {/* CloudWatch Dashboard */}
+          <div style={{ background: "#e0e7ff", borderRadius: 14, border: "2px solid #4f46e5", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#3730a3", marginBottom: 8 }}>CloudWatch Metrics & Alarms</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 8 }}>
+              {[
+                { icon: "📊", title: "Custom Namespace", desc: "GenAI/TokenMetering — separate from AWS default metrics. Dimensions: TenantId, ModelId, Environment, WorkloadTag" },
+                { icon: "📈", title: "Dashboard Widgets", desc: "Per-tenant token consumption over time, top consumers leaderboard, model usage breakdown, daily/weekly trends" },
+                { icon: "🔔", title: "Budget Alarms", desc: "Alarm when tenant exceeds 80% budget (WARN) or 100% (CRITICAL). Action: SNS → email/Slack/PagerDuty" },
+                { icon: "💰", title: "Cost Attribution", desc: "Map token counts to cost using per-model pricing. Attribute costs to teams, projects, cost centers for chargebacks" },
+                { icon: "📉", title: "Anomaly Detection", desc: "CloudWatch Anomaly Detection on per-tenant usage. Alert on sudden spikes that may indicate runaway prompts" },
+                { icon: "🗓️", title: "Retention", desc: "CloudWatch metrics retained 15 months. DynamoDB request logs retained 90 days (TTL). Monthly summaries kept indefinitely" },
+              ].map(m => (
+                <div key={m.title} style={{ background: "#fff", borderRadius: 10, padding: 12, border: "1px solid #a5b4fc" }}>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{m.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#3730a3" }}>{m.title}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>{m.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Policy Engine Detail */}
+          <div style={{ background: "#fee2e2", borderRadius: 14, border: "2px solid #ef4444", padding: 16, marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#991b1b", marginBottom: 8 }}>Configurable Policy Rules — Elevated Limits for Critical Workloads</div>
+            <div style={{ fontSize: 12, color: "#7f1d1d", lineHeight: 1.8, marginBottom: 10 }}>
+              <div><strong>Default policy:</strong> Every tenant gets a standard monthly token budget (e.g. 5M tokens). Experimental workloads stay constrained.</div>
+              <div><strong>Override mechanism:</strong> Specific tenants or workload tags can be granted elevated limits through approved policy overrides stored in DynamoDB.</div>
+              <div><strong>Approval workflow:</strong> Overrides require an <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>approved_by</code> field and an <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>expires</code> date — no permanent exceptions without review.</div>
+              <div><strong>Burst mode:</strong> Critical workloads can enable <code style={{ background: "#fff", padding: "1px 6px", borderRadius: 4 }}>allow_burst: true</code> to temporarily exceed daily limits while staying within monthly budget.</div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 }}>
+              {[
+                { icon: "🧪", title: "Experimental", budget: "1M tokens/mo", burst: "No", color: "#64748b", desc: "Sandbox/dev workloads. Hard cap, no overrides" },
+                { icon: "🏢", title: "Standard", budget: "5M tokens/mo", burst: "No", color: "#2563eb", desc: "Production tenants. Default tier for all teams" },
+                { icon: "⭐", title: "Premium", budget: "20M tokens/mo", burst: "Yes", color: "#7c3aed", desc: "High-value tenants. Daily burst allowed" },
+                { icon: "🚨", title: "Mission-Critical", budget: "Unlimited*", burst: "Yes", color: "#dc2626", desc: "Approved exceptions. Monitored, not blocked. Requires leadership sign-off" },
+              ].map(t => (
+                <div key={t.title} style={{ background: "#fff", borderRadius: 10, padding: 12, border: `2px solid ${t.color}20` }}>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{t.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: t.color }}>{t.title}</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: t.color, marginTop: 4 }}>{t.budget}</div>
+                  <div style={{ fontSize: 10, color: "#475569", marginTop: 2 }}>Burst: {t.burst}</div>
+                  <div style={{ fontSize: 10, color: "#64748b", marginTop: 4, lineHeight: 1.4 }}>{t.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tradeoffs */}
+          <div style={{ background: "#fef3c7", borderRadius: 14, border: "2px solid #f59e0b", padding: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#92400e", marginBottom: 8 }}>Design Decisions & Tradeoffs</div>
+            <div style={{ fontSize: 12, color: "#78350f", lineHeight: 2 }}>
+              <div><strong>Why meter at the Lambda layer?</strong> Metering at the API boundary ensures consistent measurement across all workloads. Lambda sits between API Gateway and Bedrock, giving full control over pre- and post-inference logic.</div>
+              <div><strong>Why DynamoDB for usage tracking?</strong> Single-digit ms reads for budget checks on every request. Atomic ADD operations prevent race conditions. TTL auto-cleans old request logs. Pay-per-request pricing scales with usage.</div>
+              <div><strong>Why both DynamoDB AND CloudWatch?</strong> DynamoDB stores granular per-request data for auditing and real-time budget checks. CloudWatch provides time-series metrics for dashboards, anomaly detection, and alarm triggers. Both are needed.</div>
+              <div><strong>Pre-inference estimation vs post-inference actual:</strong> Estimate tokens before calling Bedrock to enforce budgets proactively. Log actual tokens after to maintain accurate usage records. The gap between estimate and actual is typically small.</div>
+              <div><strong>Why configurable policy overrides?</strong> Rigid limits block mission-critical workloads. Configurable policies with expiration dates and approval chains ensure flexibility without compromising financial governance.</div>
+              <div><strong>Cost of metering layer:</strong> Adds ~10-15ms latency (DynamoDB read + CloudWatch put). Lambda cost is negligible at scale. The visibility and control easily justify the overhead for multi-tenant platforms.</div>
             </div>
           </div>
         </div>
