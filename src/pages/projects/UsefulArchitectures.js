@@ -7,6 +7,8 @@ const archTabs = [
   { id: "token-metering", label: "Token Metering & Budget Enforcement", icon: "🪙" },
 ];
 
+const ICON = `${process.env.PUBLIC_URL}/aws-icons`;
+
 const CodeBlock = ({ code }) => (
   <div style={{ background: "#0f172a", borderRadius: 10, padding: 14, fontSize: 11, fontFamily: "'Fira Code', 'Cascadia Code', monospace", color: "#a5b4fc", overflowX: "auto", lineHeight: 1.6, whiteSpace: "pre", marginTop: 8 }}>
     {code}
@@ -16,25 +18,15 @@ const CodeBlock = ({ code }) => (
 // ─── S3 → OpenSearch Architecture SVG ───
 const IngestionArchSVG = ({ highlight, onHighlight }) => {
   const services = [
-    // Row 1: S3 Source
-    { id: "s3", x: 20, y: 30, w: 120, h: 60, label: "Amazon S3", sub: "80M Documents", fill: "#d1fae5", stroke: "#059669", icon: "🪣" },
-    // Row 1: EventBridge
-    { id: "eventbridge", x: 180, y: 30, w: 120, h: 60, label: "EventBridge", sub: "s3:ObjectCreated", fill: "#fef3c7", stroke: "#d97706", icon: "📡" },
-
-    // Bulk path
-    { id: "batch", x: 20, y: 160, w: 140, h: 60, label: "AWS Batch", sub: "Array Job (1000 tasks)", fill: "#dbeafe", stroke: "#2563eb", icon: "📦" },
-    { id: "retry", x: 20, y: 240, w: 140, h: 40, label: "Retry Strategy", sub: "3 attempts, exp backoff", fill: "#fee2e2", stroke: "#dc2626", icon: "🔄" },
-
-    // Real-time path
-    { id: "sqs", x: 350, y: 30, w: 120, h: 60, label: "Amazon SQS", sub: "New Doc Queue", fill: "#ede9fe", stroke: "#7c3aed", icon: "📬" },
-    { id: "lambda", x: 350, y: 130, w: 120, h: 60, label: "AWS Lambda", sub: "Embedding Function", fill: "#fef3c7", stroke: "#d97706", icon: "⚡" },
-    { id: "dlq", x: 510, y: 30, w: 110, h: 60, label: "DLQ", sub: "Failed Messages", fill: "#fee2e2", stroke: "#dc2626", icon: "🚨" },
-
-    // Shared: Embedding model
-    { id: "bedrock", x: 200, y: 320, w: 160, h: 60, label: "Bedrock / SageMaker", sub: "Embedding Model", fill: "#fce7f3", stroke: "#ec4899", icon: "🧠" },
-
-    // Destination
-    { id: "opensearch", x: 450, y: 280, w: 170, h: 80, label: "Amazon OpenSearch", sub: "Vector Database\n(k-NN index)", fill: "#d1fae5", stroke: "#059669", icon: "🔍" },
+    { id: "s3", x: 20, y: 30, w: 120, h: 60, label: "Amazon S3", sub: "80M Documents", fill: "#d1fae5", stroke: "#059669", img: "s3" },
+    { id: "eventbridge", x: 180, y: 30, w: 120, h: 60, label: "EventBridge", sub: "s3:ObjectCreated", fill: "#fef3c7", stroke: "#d97706", img: "eventbridge" },
+    { id: "batch", x: 20, y: 160, w: 140, h: 60, label: "AWS Batch", sub: "Array Job (1000 tasks)", fill: "#dbeafe", stroke: "#2563eb", img: "batch" },
+    { id: "retry", x: 20, y: 240, w: 140, h: 40, label: "Retry Strategy", sub: "3 attempts, exp backoff", fill: "#fee2e2", stroke: "#dc2626" },
+    { id: "sqs", x: 350, y: 30, w: 120, h: 60, label: "Amazon SQS", sub: "New Doc Queue", fill: "#ede9fe", stroke: "#7c3aed", img: "sqs" },
+    { id: "lambda", x: 350, y: 130, w: 120, h: 60, label: "AWS Lambda", sub: "Embedding Function", fill: "#fef3c7", stroke: "#d97706", img: "lambda" },
+    { id: "dlq", x: 510, y: 30, w: 110, h: 60, label: "DLQ", sub: "Failed Messages", fill: "#fee2e2", stroke: "#dc2626", img: "sqs" },
+    { id: "bedrock", x: 200, y: 320, w: 160, h: 60, label: "Bedrock / SageMaker", sub: "Embedding Model", fill: "#fce7f3", stroke: "#ec4899", img: "bedrock" },
+    { id: "opensearch", x: 450, y: 280, w: 170, h: 80, label: "Amazon OpenSearch", sub: "Vector Database\n(k-NN index)", fill: "#d1fae5", stroke: "#059669", img: "opensearch" },
   ];
 
   const arrows = [
@@ -89,15 +81,17 @@ const IngestionArchSVG = ({ highlight, onHighlight }) => {
       {/* Service boxes */}
       {services.map(s => {
         const isHighlighted = highlight === s.id;
+        const hasImg = !!s.img;
         return (
           <g key={s.id} onClick={() => onHighlight && onHighlight(s.id)} style={{ cursor: "pointer" }}>
             <rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10}
               fill={isHighlighted ? s.stroke : s.fill} stroke={s.stroke} strokeWidth={isHighlighted ? 2.5 : 1.5} />
-            <text x={s.x + s.w / 2} y={s.y + 20} textAnchor="middle" fontSize={10} fill={isHighlighted ? "#fff" : s.stroke} fontWeight="700">
-              {s.icon} {s.label}
+            {hasImg && <image href={`${ICON}/${s.img}.png`} x={s.x + 4} y={s.y + (s.h - 28) / 2} width={28} height={28} />}
+            <text x={s.x + (hasImg ? 36 : s.w / 2)} y={s.y + (s.h / 2) - 4} textAnchor={hasImg ? "start" : "middle"} fontSize={9} fill={isHighlighted ? "#fff" : s.stroke} fontWeight="700">
+              {s.label}
             </text>
             {s.sub.split("\n").map((line, i) => (
-              <text key={i} x={s.x + s.w / 2} y={s.y + 34 + i * 13} textAnchor="middle" fontSize={8} fill={isHighlighted ? "#e2e8f0" : "#64748b"}>
+              <text key={i} x={s.x + (hasImg ? 36 : s.w / 2)} y={s.y + (s.h / 2) + 9 + i * 11} textAnchor={hasImg ? "start" : "middle"} fontSize={8} fill={isHighlighted ? "#e2e8f0" : "#64748b"}>
                 {line}
               </text>
             ))}
@@ -111,14 +105,14 @@ const IngestionArchSVG = ({ highlight, onHighlight }) => {
 // ─── Serverless RAG Architecture SVG ───
 const RAGArchSVG = () => {
   const services = [
-    { id: "s3", x: 20, y: 20, w: 120, h: 55, label: "Amazon S3", sub: "PDF, HTML, CSV, TXT", fill: "#d1fae5", stroke: "#059669", icon: "🪣" },
-    { id: "kb", x: 200, y: 20, w: 160, h: 55, label: "Bedrock Knowledge Base", sub: "Chunk → Embed → Index", fill: "#ede9fe", stroke: "#7c3aed", icon: "📚" },
-    { id: "oss", x: 420, y: 20, w: 170, h: 55, label: "OpenSearch Serverless", sub: "Vector Store (k-NN)", fill: "#dbeafe", stroke: "#2563eb", icon: "🔍" },
-    { id: "user", x: 20, y: 150, w: 100, h: 55, label: "User / App", sub: "Query via API", fill: "#fef3c7", stroke: "#d97706", icon: "👤" },
-    { id: "agent", x: 180, y: 150, w: 140, h: 55, label: "Bedrock Agent", sub: "Orchestration (optional)", fill: "#fce7f3", stroke: "#ec4899", icon: "🤖" },
-    { id: "retrieve", x: 380, y: 150, w: 130, h: 55, label: "Retrieve API", sub: "Top-K vector search", fill: "#dbeafe", stroke: "#2563eb", icon: "🔎" },
-    { id: "fm", x: 200, y: 260, w: 160, h: 55, label: "Foundation Model", sub: "Claude / Titan / Llama", fill: "#fce7f3", stroke: "#ec4899", icon: "🧠" },
-    { id: "response", x: 430, y: 260, w: 140, h: 55, label: "Cited Response", sub: "Answer + S3 citations", fill: "#d1fae5", stroke: "#059669", icon: "📋" },
+    { id: "s3", x: 20, y: 20, w: 120, h: 55, label: "Amazon S3", sub: "PDF, HTML, CSV, TXT", fill: "#d1fae5", stroke: "#059669", img: "s3" },
+    { id: "kb", x: 200, y: 20, w: 160, h: 55, label: "Bedrock Knowledge Base", sub: "Chunk → Embed → Index", fill: "#ede9fe", stroke: "#7c3aed", img: "bedrock" },
+    { id: "oss", x: 420, y: 20, w: 170, h: 55, label: "OpenSearch Serverless", sub: "Vector Store (k-NN)", fill: "#dbeafe", stroke: "#2563eb", img: "opensearch" },
+    { id: "user", x: 20, y: 150, w: 100, h: 55, label: "User / App", sub: "Query via API", fill: "#fef3c7", stroke: "#d97706" },
+    { id: "agent", x: 180, y: 150, w: 140, h: 55, label: "Bedrock Agent", sub: "Orchestration (optional)", fill: "#fce7f3", stroke: "#ec4899", img: "bedrock" },
+    { id: "retrieve", x: 380, y: 150, w: 130, h: 55, label: "Retrieve API", sub: "Top-K vector search", fill: "#dbeafe", stroke: "#2563eb", img: "opensearch" },
+    { id: "fm", x: 200, y: 260, w: 160, h: 55, label: "Foundation Model", sub: "Claude / Titan / Llama", fill: "#fce7f3", stroke: "#ec4899", img: "bedrock" },
+    { id: "response", x: 430, y: 260, w: 140, h: 55, label: "Cited Response", sub: "Answer + S3 citations", fill: "#d1fae5", stroke: "#059669" },
   ];
   const arrows = [
     { path: "M140,47 L200,47", color: "#7c3aed", label: "sync" },
@@ -147,9 +141,10 @@ const RAGArchSVG = () => {
         const mx=(pts[0]+pts[pts.length-2])/2, my=(pts[1]+pts[pts.length-1])/2;
         return(<g key={i}><path d={a.path} fill="none" stroke={a.color} strokeWidth={2} markerEnd={`url(#rag-arr-${a.color.slice(1)})`} opacity={0.6}/><text x={mx} y={my-6} textAnchor="middle" fontSize={8} fill={a.color} fontWeight="600">{a.label}</text></g>);
       })}
-      {services.map(s=>(
-        <g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/><text x={s.x+s.w/2} y={s.y+20} textAnchor="middle" fontSize={10} fill={s.stroke} fontWeight="700">{s.icon} {s.label}</text><text x={s.x+s.w/2} y={s.y+34} textAnchor="middle" fontSize={8} fill="#64748b">{s.sub}</text></g>
-      ))}
+      {services.map(s=>{
+        const hasImg = !!s.img;
+        return(<g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/>{hasImg && <image href={`${ICON}/${s.img}.png`} x={s.x+4} y={s.y+(s.h-26)/2} width={26} height={26}/>}<text x={s.x+(hasImg?34:s.w/2)} y={s.y+(s.h/2)-4} textAnchor={hasImg?"start":"middle"} fontSize={9} fill={s.stroke} fontWeight="700">{s.label}</text><text x={s.x+(hasImg?34:s.w/2)} y={s.y+(s.h/2)+9} textAnchor={hasImg?"start":"middle"} fontSize={8} fill="#64748b">{s.sub}</text></g>);
+      })}
     </svg>
   );
 };
@@ -157,15 +152,15 @@ const RAGArchSVG = () => {
 // ─── Real-Time GenAI Chat Architecture SVG ───
 const ChatArchSVG = () => {
   const services = [
-    { id: "client", x: 20, y: 30, w: 110, h: 55, label: "React SPA", sub: "CloudFront + S3", fill: "#dbeafe", stroke: "#2563eb", icon: "🌐" },
-    { id: "cognito", x: 170, y: 30, w: 110, h: 55, label: "Cognito", sub: "JWT Auth", fill: "#fef3c7", stroke: "#d97706", icon: "🔐" },
-    { id: "apigw", x: 320, y: 30, w: 130, h: 55, label: "API Gateway", sub: "REST / WebSocket", fill: "#ede9fe", stroke: "#7c3aed", icon: "🔗" },
-    { id: "lambda", x: 320, y: 140, w: 130, h: 55, label: "Lambda", sub: "Chat Handler", fill: "#fef3c7", stroke: "#d97706", icon: "⚡" },
-    { id: "guardrail", x: 500, y: 30, w: 120, h: 55, label: "Guardrails", sub: "Content Safety", fill: "#fee2e2", stroke: "#dc2626", icon: "🛡️" },
-    { id: "bedrock", x: 500, y: 140, w: 120, h: 55, label: "Bedrock FM", sub: "Claude / Titan", fill: "#fce7f3", stroke: "#ec4899", icon: "🧠" },
-    { id: "dynamo", x: 140, y: 140, w: 130, h: 55, label: "DynamoDB", sub: "Conversation Memory", fill: "#d1fae5", stroke: "#059669", icon: "💾" },
-    { id: "cloudwatch", x: 320, y: 250, w: 130, h: 50, label: "CloudWatch", sub: "Logs + Metrics", fill: "#e0e7ff", stroke: "#4f46e5", icon: "📊" },
-    { id: "stream", x: 20, y: 140, w: 80, h: 55, label: "Stream", sub: "Response tokens", fill: "#fce7f3", stroke: "#ec4899", icon: "📡" },
+    { id: "client", x: 20, y: 30, w: 110, h: 55, label: "React SPA", sub: "CloudFront + S3", fill: "#dbeafe", stroke: "#2563eb", img: "cloudfront" },
+    { id: "cognito", x: 170, y: 30, w: 110, h: 55, label: "Cognito", sub: "JWT Auth", fill: "#fef3c7", stroke: "#d97706", img: "cognito" },
+    { id: "apigw", x: 320, y: 30, w: 130, h: 55, label: "API Gateway", sub: "REST / WebSocket", fill: "#ede9fe", stroke: "#7c3aed", img: "apigateway" },
+    { id: "lambda", x: 320, y: 140, w: 130, h: 55, label: "Lambda", sub: "Chat Handler", fill: "#fef3c7", stroke: "#d97706", img: "lambda" },
+    { id: "guardrail", x: 500, y: 30, w: 120, h: 55, label: "Guardrails", sub: "Content Safety", fill: "#fee2e2", stroke: "#dc2626", img: "bedrock" },
+    { id: "bedrock", x: 500, y: 140, w: 120, h: 55, label: "Bedrock FM", sub: "Claude / Titan", fill: "#fce7f3", stroke: "#ec4899", img: "bedrock" },
+    { id: "dynamo", x: 140, y: 140, w: 130, h: 55, label: "DynamoDB", sub: "Conversation Memory", fill: "#d1fae5", stroke: "#059669", img: "dynamodb" },
+    { id: "cloudwatch", x: 320, y: 250, w: 130, h: 50, label: "CloudWatch", sub: "Logs + Metrics", fill: "#e0e7ff", stroke: "#4f46e5", img: "cloudwatch" },
+    { id: "stream", x: 20, y: 140, w: 80, h: 55, label: "Stream", sub: "Response tokens", fill: "#fce7f3", stroke: "#ec4899" },
   ];
   const arrows = [
     { path: "M130,57 L170,57", color: "#d97706", label: "auth" },
@@ -192,9 +187,10 @@ const ChatArchSVG = () => {
         const mx=(pts[0]+pts[pts.length-2])/2, my=(pts[1]+pts[pts.length-1])/2;
         return(<g key={i}><path d={a.path} fill="none" stroke={a.color} strokeWidth={2} markerEnd={`url(#chat-arr-${a.color.slice(1)})`} opacity={0.6}/><text x={mx} y={my-6} textAnchor="middle" fontSize={8} fill={a.color} fontWeight="600">{a.label}</text></g>);
       })}
-      {services.map(s=>(
-        <g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/><text x={s.x+s.w/2} y={s.y+20} textAnchor="middle" fontSize={10} fill={s.stroke} fontWeight="700">{s.icon} {s.label}</text><text x={s.x+s.w/2} y={s.y+34} textAnchor="middle" fontSize={8} fill="#64748b">{s.sub}</text></g>
-      ))}
+      {services.map(s=>{
+        const hasImg = !!s.img;
+        return(<g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/>{hasImg && <image href={`${ICON}/${s.img}.png`} x={s.x+4} y={s.y+(s.h-26)/2} width={26} height={26}/>}<text x={s.x+(hasImg?34:s.w/2)} y={s.y+(s.h/2)-4} textAnchor={hasImg?"start":"middle"} fontSize={9} fill={s.stroke} fontWeight="700">{s.label}</text><text x={s.x+(hasImg?34:s.w/2)} y={s.y+(s.h/2)+9} textAnchor={hasImg?"start":"middle"} fontSize={8} fill="#64748b">{s.sub}</text></g>);
+      })}
     </svg>
   );
 };
@@ -202,20 +198,16 @@ const ChatArchSVG = () => {
 // ─── Token Metering Architecture SVG ───
 const TokenMeteringSVG = () => {
   const services = [
-    // Row 1: Entry
-    { id: "tenant", x: 10, y: 20, w: 100, h: 55, label: "Tenant App", sub: "Per-tenant API key", fill: "#fef3c7", stroke: "#d97706", icon: "👤" },
-    { id: "apigw", x: 150, y: 20, w: 120, h: 55, label: "API Gateway", sub: "Usage Plan + Key", fill: "#ede9fe", stroke: "#7c3aed", icon: "🔗" },
-    { id: "meter", x: 310, y: 20, w: 130, h: 55, label: "Metering Lambda", sub: "Budget Check + Log", fill: "#dbeafe", stroke: "#2563eb", icon: "🪙" },
-    { id: "bedrock", x: 490, y: 20, w: 130, h: 55, label: "Amazon Bedrock", sub: "FM Inference", fill: "#fce7f3", stroke: "#ec4899", icon: "🧠" },
-    // Row 2: Storage
-    { id: "dynamo", x: 150, y: 140, w: 140, h: 55, label: "DynamoDB", sub: "Token Usage + Budgets", fill: "#d1fae5", stroke: "#059669", icon: "💾" },
-    { id: "cloudwatch", x: 350, y: 140, w: 130, h: 55, label: "CloudWatch", sub: "Metrics + Alarms", fill: "#e0e7ff", stroke: "#4f46e5", icon: "📊" },
-    // Row 3: Policy + Reporting
-    { id: "policy", x: 10, y: 140, w: 110, h: 55, label: "Policy Engine", sub: "Budget Rules", fill: "#fee2e2", stroke: "#dc2626", icon: "📋" },
-    { id: "dashboard", x: 530, y: 140, w: 110, h: 55, label: "Dashboard", sub: "Per-Tenant Reports", fill: "#fef3c7", stroke: "#d97706", icon: "📈" },
-    // Row 3: Post-processing
-    { id: "post", x: 490, y: 260, w: 130, h: 55, label: "Post-Process Lambda", sub: "Log Output Tokens", fill: "#dbeafe", stroke: "#2563eb", icon: "📝" },
-    { id: "sns", x: 310, y: 260, w: 130, h: 55, label: "Amazon SNS", sub: "Budget Alerts", fill: "#fee2e2", stroke: "#dc2626", icon: "🔔" },
+    { id: "tenant", x: 10, y: 20, w: 100, h: 55, label: "Tenant App", sub: "Per-tenant API key", fill: "#fef3c7", stroke: "#d97706" },
+    { id: "apigw", x: 150, y: 20, w: 120, h: 55, label: "API Gateway", sub: "Usage Plan + Key", fill: "#ede9fe", stroke: "#7c3aed", img: "apigateway" },
+    { id: "meter", x: 310, y: 20, w: 130, h: 55, label: "Metering Lambda", sub: "Budget Check + Log", fill: "#dbeafe", stroke: "#2563eb", img: "lambda" },
+    { id: "bedrock", x: 490, y: 20, w: 130, h: 55, label: "Amazon Bedrock", sub: "FM Inference", fill: "#fce7f3", stroke: "#ec4899", img: "bedrock" },
+    { id: "dynamo", x: 150, y: 140, w: 140, h: 55, label: "DynamoDB", sub: "Token Usage + Budgets", fill: "#d1fae5", stroke: "#059669", img: "dynamodb" },
+    { id: "cloudwatch", x: 350, y: 140, w: 130, h: 55, label: "CloudWatch", sub: "Metrics + Alarms", fill: "#e0e7ff", stroke: "#4f46e5", img: "cloudwatch" },
+    { id: "policy", x: 10, y: 140, w: 110, h: 55, label: "Policy Engine", sub: "Budget Rules", fill: "#fee2e2", stroke: "#dc2626" },
+    { id: "dashboard", x: 530, y: 140, w: 110, h: 55, label: "Dashboard", sub: "Per-Tenant Reports", fill: "#fef3c7", stroke: "#d97706", img: "cloudwatch" },
+    { id: "post", x: 490, y: 260, w: 130, h: 55, label: "Post-Process Lambda", sub: "Log Output Tokens", fill: "#dbeafe", stroke: "#2563eb", img: "lambda" },
+    { id: "sns", x: 310, y: 260, w: 130, h: 55, label: "Amazon SNS", sub: "Budget Alerts", fill: "#fee2e2", stroke: "#dc2626", img: "sns" },
   ];
   const arrows = [
     { path: "M110,47 L150,47", color: "#7c3aed", label: "request" },
@@ -249,9 +241,10 @@ const TokenMeteringSVG = () => {
         const mx=(pts[0]+pts[pts.length-2])/2, my=(pts[1]+pts[pts.length-1])/2;
         return(<g key={i}><path d={a.path} fill="none" stroke={a.color} strokeWidth={2} markerEnd={`url(#tm-arr-${a.color.slice(1)})`} opacity={0.6}/><text x={mx} y={my-6} textAnchor="middle" fontSize={7} fill={a.color} fontWeight="600">{a.label}</text></g>);
       })}
-      {services.map(s=>(
-        <g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/><text x={s.x+s.w/2} y={s.y+20} textAnchor="middle" fontSize={10} fill={s.stroke} fontWeight="700">{s.icon} {s.label}</text><text x={s.x+s.w/2} y={s.y+34} textAnchor="middle" fontSize={8} fill="#64748b">{s.sub}</text></g>
-      ))}
+      {services.map(s=>{
+        const hasImg = !!s.img;
+        return(<g key={s.id}><rect x={s.x} y={s.y} width={s.w} height={s.h} rx={10} fill={s.fill} stroke={s.stroke} strokeWidth={1.5}/>{hasImg && <image href={`${ICON}/${s.img}.png`} x={s.x+4} y={s.y+(s.h-26)/2} width={26} height={26}/>}<text x={s.x+(hasImg?34:s.w/2)} y={s.y+(s.h/2)-4} textAnchor={hasImg?"start":"middle"} fontSize={9} fill={s.stroke} fontWeight="700">{s.label}</text><text x={s.x+(hasImg?34:s.w/2)} y={s.y+(s.h/2)+9} textAnchor={hasImg?"start":"middle"} fontSize={8} fill="#64748b">{s.sub}</text></g>);
+      })}
     </svg>
   );
 };
