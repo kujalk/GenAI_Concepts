@@ -20,6 +20,8 @@ import LLMTrainingAndFineTuning from './pages/projects/LLMTrainingAndFineTuning'
 import SageMakerLineage from './pages/projects/SageMakerLineage';
 import UsefulArchitectures from './pages/projects/UsefulArchitectures';
 import GlueAthenaGuide from './pages/projects/GlueAthenaGuide';
+import LLMBasics from './pages/projects/LLMBasics';
+import KarpathyGPT from './pages/projects/KarpathyGPT';
 
 export default function App() {
   return (
@@ -45,6 +47,8 @@ export default function App() {
             <Route path="/sagemaker-lineage" element={<SageMakerLineage />} />
             <Route path="/useful-architectures" element={<UsefulArchitectures />} />
             <Route path="/glue-crawlers-and-data-catalog" element={<GlueAthenaGuide />} />
+            <Route path="/llm-basics" element={<LLMBasics />} />
+            <Route path="/karpathy-gpt" element={<KarpathyGPT />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

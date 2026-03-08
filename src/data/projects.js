@@ -1,5 +1,13 @@
 const projects = [
   {
+  id: "llm-basics",
+  title: "LLM Fundamentals",
+  description: "Interactive guide to tokens, context windows, and how system & user messages are bundled for continuous iteration",
+  icon: "🧠",
+  tags: ["React", "LLM", "Tokens", "Context Window"],
+  path: "/llm-basics",
+  },
+  {
     id: "aws-ml-services-overview",
     title: "AWS ML Services Overview",
     description: "Overview of AWS AI and ML services including Bedrock, SageMaker, and AI Services",
@@ -142,6 +150,14 @@ const projects = [
   icon: "📊",
   tags: ["React", "AWS", "Glue", "Data Catalog"],
   path: "/glue-crawlers-and-data-catalog",
+  },
+  {
+  id: "karpathy-gpt",
+  title: "GPT in 243 Lines — Karpathy",
+  description: "Interactive walkthrough of Andrej Karpathy's nanoGPT — animated architecture, attention explorer, and training dynamics",
+  icon: "🔬",
+  tags: ["React", "GPT", "Transformers", "Karpathy", "Deep Learning"],
+  path: "/karpathy-gpt",
   }
 
 ];
